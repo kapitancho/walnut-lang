@@ -2,7 +2,7 @@
     "name": "kapitancho/walnut-lang",
     "autoload": {
         "psr-4": {
-            "Walnut\\Lib\\": "src"
+            "Walnut\\Lang\\": "src"
         }
     },
     "authors": [
