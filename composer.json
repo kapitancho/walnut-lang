@@ -1,0 +1,18 @@
+{
+    "name": "kapitancho/walnut-lang",
+    "autoload": {
+        "psr-4": {
+            "Walnut\\Lib\\": "src"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marian Kostadinov",
+            "email": "manchokapitancho@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "kapitancho/walex": "^0.0.1"
+	}
+}

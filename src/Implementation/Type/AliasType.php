@@ -1,0 +1,49 @@
+<?php
+
+namespace Walnut\Lang\Implementation\Type;
+
+use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
+use Walnut\Lang\Blueprint\Type\AliasType as AliasTypeInterface;
+use Walnut\Lang\Blueprint\Type\Type;
+
+final readonly class AliasType implements AliasTypeInterface, SupertypeChecker {
+
+    public function __construct(
+	    private TypeNameIdentifier $typeName,
+        private Type $aliasedType
+    ) {}
+
+	public function name(): TypeNameIdentifier {
+		return $this->typeName;
+    }
+
+	public function aliasedType(): Type {
+        return $this->aliasedType;
+    }
+
+	public function closestBaseType(): Type {
+		return $this->aliasedType instanceof AliasTypeInterface
+			? $this->aliasedType->closestBaseType()
+			: $this->aliasedType;
+	}
+
+    public function isSubtypeOf(Type $ofType): bool {
+		if ($ofType instanceof AliasTypeInterface && $this->typeName->equals($ofType->typeName)) {
+			return true;
+		}
+        return (
+            $this->aliasedType->isSubtypeOf($ofType)
+        ) || (
+            $ofType instanceof SupertypeChecker &&
+            $ofType->isSupertypeOf($this)
+        );
+    }
+
+	public function __toString(): string {
+		return (string)$this->typeName;
+	}
+
+	public function isSupertypeOf(Type $ofType): bool {
+		return $ofType->isSubtypeOf($this->aliasedType);
+	}
+}

@@ -1,0 +1,35 @@
+<?php
+
+namespace Walnut\Lang\Implementation\Type;
+
+use Walnut\Lang\Blueprint\Type\MutableType as MutableTypeInterface;
+use Walnut\Lang\Blueprint\Type\Type;
+
+final readonly class MutableType implements MutableTypeInterface {
+
+	private Type $realValueType;
+
+    public function __construct(
+        private Type $valueType
+    ) {}
+
+    public function valueType(): Type {
+        return $this->realValueType ??= $this->valueType instanceof ProxyNamedType ?
+            $this->valueType->getActualType() : $this->valueType;
+    }
+
+    public function isSubtypeOf(Type $ofType): bool {
+        return (
+            $ofType instanceof MutableTypeInterface &&
+            $this->valueType()->isSubtypeOf($ofType->valueType()) &&
+            $ofType->valueType()->isSubtypeOf($this->valueType())
+        ) || (
+            $ofType instanceof SupertypeChecker &&
+            $ofType->isSupertypeOf($this)
+        );
+    }
+
+	public function __toString(): string {
+		return sprintf("Mutable<%s>", $this->valueType());
+	}
+}

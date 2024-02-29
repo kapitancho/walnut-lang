@@ -1,0 +1,87 @@
+<?php
+
+namespace Walnut\Lang\Implementation\Registry;
+
+use Walnut\Lang\Blueprint\Type\AliasType;
+use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
+use Walnut\Lang\Blueprint\Type\IntegerType;
+use Walnut\Lang\Blueprint\Type\Type;
+use Walnut\Lang\Implementation\Type\ResultType;
+use Walnut\Lang\Implementation\Type\UnionType;
+
+final readonly class UnionTypeNormalizer {
+    public function __construct(private TypeRegistry $typeRegistry) {}
+
+    public function normalize(Type ... $types): Type {
+        $parsedTypes = $this->parseTypes($types);
+        if (count($parsedTypes) === 0) {
+            return $this->typeRegistry->nothing();
+        }
+        if (count($parsedTypes) === 1) {
+            return $parsedTypes[0];
+        }
+        return new UnionType(...$parsedTypes);
+    }
+
+    private function parseTypes(array $types): array {
+        $queue = [];
+        foreach ($types as $type) {
+            $xType = $type;
+            while ($xType instanceof AliasType) {
+                $xType = $xType->aliasedType();
+            }
+            $pTypes = $xType instanceof UnionType ?
+                $this->parseTypes($xType->types()) : [$xType];
+            foreach ($pTypes as $tx) {
+                foreach ($queue as $qt) {
+                    if ($tx->isSubtypeOf($qt)) {
+                        continue 2;
+                    }
+                }
+                for($ql = count($queue) - 1; $ql >= 0; $ql--) {
+                    $q = $queue[$ql];
+                    if ($q->isSubtypeOf($tx)) {
+                        array_splice($queue, $ql, 1);
+                    } else if ($q instanceof ResultType || $tx instanceof ResultType) {
+	                    array_splice($queue, $ql, 1);
+
+						$returnTypes = [
+							$q instanceof ResultType ? $q->returnType() : $q,
+							$tx instanceof ResultType ? $tx->returnType() : $tx,
+						];
+						$errorTypes = [];
+						if ($q instanceof ResultType) {
+							$errorTypes[] = $q->errorType();
+						}
+						if ($tx instanceof ResultType) {
+							$errorTypes[] = $tx->errorType();
+						}
+						$tx = $this->typeRegistry->result(
+							$this->normalize(... $returnTypes),
+							$this->normalize(... $errorTypes),
+						);
+                    } else if ($q instanceof IntegerType && $tx instanceof IntegerType) {
+                        $newRange = $q->range()->tryRangeUnionWith($tx->range());
+                        if ($newRange) {
+                            array_splice($queue, $ql, 1);
+                            $tx = $this->typeRegistry->integer(
+                                $newRange->minValue(), $newRange->maxValue()
+                            );
+                        }
+                    } else if ($q instanceof IntegerSubsetType && $tx instanceof IntegerSubsetType) {
+                        array_splice($queue, $ql, 1);
+                        $tx = $this->typeRegistry->integerSubset(
+                            array_values(
+                                array_unique(
+                                    array_merge($q->subsetValues(), $tx->subsetValues())
+                                )
+                            )
+                        );
+                    }
+                }
+                $queue[] = $tx;
+            }
+        }
+        return $queue;
+    }
+}
