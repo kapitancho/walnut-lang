@@ -12,4 +12,13 @@ $ composer require kapitancho/walnut-lang
 ## Usage
 
 Walnut is a programming language. You can use one of the adapters in order to have 
-communication between the language and the host environment.
+interactions between the language and the host environment.
+
+## Adapters
+
+- [CLI Adapter](https://github.com/kapitancho/walnut-lang-cli-adapter)
+- [PSR HTTP Adapter] (coming soon)
+- [Swoole HTTP Adapter] (coming soon)
+
+## Demos (recommended)
+- [Walnut Lang demos](https://github.com/kapitancho/walnut-lang-demos)
