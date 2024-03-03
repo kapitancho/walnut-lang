@@ -7,4 +7,5 @@ enum UnresolvableDependency {
 	case circularDependency;
 	case ambiguous;
 	case unsupportedType;
+	case errorWhileCreatingValue;
 }

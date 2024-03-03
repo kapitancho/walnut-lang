@@ -18,7 +18,8 @@ final class TransitionLogger {
 	public function __toString(): string {
 		$lines = [];
 		foreach($this->steps as [$i, $state, $token, $transition, $depth, $tag]) {
-			$lines[] = sprintf("%3d %3d %3d %s %s %s", $depth, $i, $state, $tag, $token->value,
+			$lines[] = sprintf("%3d %3d %3d %s %s %s", $depth, $i, $state,
+                is_string($tag) ? $tag : $tag->name, $token->patternMatch->text,
 				$transition instanceof Closure ? '(fn)' : $transition);
 		}
 		return implode("\n", $lines);

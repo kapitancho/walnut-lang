@@ -176,6 +176,7 @@ final readonly class CustomMethod implements CustomMethodInterface {
 										UnresolvableDependency::ambiguous => 'Ambiguous dependency',
 										UnresolvableDependency::notFound => 'Dependency not found',
 										UnresolvableDependency::unsupportedType => 'Unsupported type',
+                                        UnresolvableDependency::errorWhileCreatingValue => 'Error returned while creating value',
 									}
 								)
 							])

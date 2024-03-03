@@ -28,7 +28,7 @@ final readonly class ProgramBuilderFactory implements DependencyContainerInterfa
 		$this->expressionRegistry = new ExpressionRegistry(
 			$this->typeRegistry,
 			$this->valueRegistry,
-			new MainMethodRegistry(
+			$methodRegistry = new MainMethodRegistry(
 				new NativeCodeContext($this->typeRegistry, $this->valueRegistry),
 				new NativeCodeTypeMapper(),
 				$this->customMethodRegistryBuilder =
@@ -42,6 +42,7 @@ final readonly class ProgramBuilderFactory implements DependencyContainerInterfa
 		);
 		$this->dependencyContainer = new DependencyContainer(
 			$this->valueRegistry,
+            $methodRegistry,
 			$this->expressionRegistry,
 		);
 		$this->builder = new ProgramBuilder(

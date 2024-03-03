@@ -100,7 +100,8 @@ final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodR
 									UnresolvableDependency::notFound => "no appropriate value found",
 									UnresolvableDependency::ambiguous => "ambiguity - multiple values found",
 									UnresolvableDependency::circularDependency => "circular dependency detected",
-									UnresolvableDependency::unsupportedType => "unsupported type found"
+									UnresolvableDependency::unsupportedType => "unsupported type found",
+                                    UnresolvableDependency::errorWhileCreatingValue => 'error returned while creating value',
 								}
 							)
 						);
