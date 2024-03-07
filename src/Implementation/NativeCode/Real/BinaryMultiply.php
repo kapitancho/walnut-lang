@@ -6,6 +6,7 @@ use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
+use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
@@ -35,6 +36,13 @@ final readonly class BinaryMultiply implements Method {
 				$parameterType instanceof RealType ||
 				$parameterType instanceof RealSubsetType
 			) {
+				if ($targetType->range()->minValue() >= 0 && $parameterType->range()->minValue() >= 0) {
+				    $min = $targetType->range()->minValue() * $parameterType->range()->minValue();
+				    $max = $targetType->range()->maxValue() === PlusInfinity::value ||
+				    $parameterType->range()->maxValue() === PlusInfinity::value   ? PlusInfinity::value :
+				        $targetType->range()->maxValue() * $parameterType->range()->maxValue();
+				    return $this->context->typeRegistry->real($min, $max);
+				}
 				return $this->context->typeRegistry->real();
 			}
 			// @codeCoverageIgnoreStart

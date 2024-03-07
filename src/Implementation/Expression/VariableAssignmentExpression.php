@@ -10,6 +10,7 @@ use Walnut\Lang\Blueprint\Execution\VariablePair;
 use Walnut\Lang\Blueprint\Execution\VariableScope;
 use Walnut\Lang\Blueprint\Execution\VariableValuePair;
 use Walnut\Lang\Blueprint\Execution\VariableValueScope;
+use Walnut\Lang\Blueprint\Expression\ConstantExpression;
 use Walnut\Lang\Blueprint\Expression\Expression;
 use Walnut\Lang\Blueprint\Expression\VariableAssignmentExpression as VariableAssignmentExpressionInterface;
 use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
@@ -72,7 +73,7 @@ final readonly class VariableAssignmentExpression implements VariableAssignmentE
 	public function execute(VariableValueScope $variableValueScope): ExecutionResultValueContext {
 		$ret = $this->assignedExpression->execute($variableValueScope);
 		$val = $ret->typedValue();
-		if ($val->value instanceof FunctionValue) {
+		if ($val->value instanceof FunctionValue && $this->assignedExpression instanceof ConstantExpression) {
 			$val = new TypedValue($val->type, $val->value->withSelfReferenceAs($this->variableName));
 		}
 		return $ret->withVariableValueScope(
