@@ -17,8 +17,8 @@ interactions between the language and the host environment.
 ## Adapters
 
 - [CLI Adapter](https://github.com/kapitancho/walnut-lang-cli-adapter)
-- [PSR HTTP Adapter] (https://github.com/kapitancho/walnut-lang-psr-http-adapter/)
-- [Swoole HTTP Adapter] (coming soon)
+- [PSR HTTP Adapter](https://github.com/kapitancho/walnut-lang-psr-http-adapter/)
+- [Swoole HTTP Adapter](https://github.com/kapitancho/walnut-lang-swoole-http-adapter/) (coming soon)
 
 ## Demos (recommended)
 - [Walnut Lang demos](https://github.com/kapitancho/walnut-lang-demos)
