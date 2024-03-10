@@ -22,3 +22,4 @@ interactions between the language and the host environment.
 
 ## Demos (recommended)
 - [Walnut Lang demos](https://github.com/kapitancho/walnut-lang-demos)
+- [SushiGo (R) demo](https://github.com/kapitancho/walnut-lang-sushi-go-demo)
