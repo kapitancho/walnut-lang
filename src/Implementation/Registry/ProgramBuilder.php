@@ -95,126 +95,7 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program 
 		private ExpressionRegistry $expressionRegistry,
 		private CustomMethodRegistryBuilder $customMethodRegistryBuilder,
 		private DependencyContainer $dependencyContainer
-	) {
-		/*
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('IndexOutOfRange'),
-			$this->typeRegistry->integer(),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('CastNotAvailable'),
-			$this->typeRegistry->record([
-				'from' => $this->typeRegistry->type($this->typeRegistry->any()),
-				'to' => $this->typeRegistry->type($this->typeRegistry->any()),
-			]),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('MapItemNotFound'),
-			$this->typeRegistry->string(),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('InvalidJsonValue'),
-			$this->typeRegistry->any(),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('UnknownEnumerationValue'),
-			$this->typeRegistry->record([
-				'enumeration' => $this->typeRegistry->type($this->typeRegistry->any()),
-				'value' => $this->typeRegistry->string(),
-			]),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('DependencyContainerError'),
-			$this->typeRegistry->record([
-				'targetType' => $this->typeRegistry->type($this->typeRegistry->any()),
-				'errorMessage' => $this->typeRegistry->string(),
-			]),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('HydrationError'),
-			$this->typeRegistry->record([
-				'value' => $this->typeRegistry->any(),
-				'hydrationPath' => $this->typeRegistry->string(),
-				'errorMessage' => $this->typeRegistry->string(),
-			]),
-		);
-		$this->typeRegistryBuilder->addSubtype(
-			new TypeNameIdentifier('DatabaseConnection'),
-			$this->typeRegistry->record([
-				'dsn' => $this->typeRegistry->string()
-			]),
-			$this->expressionRegistry->functionBody(
-				$this->expressionRegistry->constant(
-					$this->valueRegistry->null()
-				)
-			),
-			null
-		);
-		$this->typeRegistryBuilder->addAlias(
-			new TypeNameIdentifier('DatabaseValue'),
-			$this->typeRegistry->union([
-				$this->typeRegistry->string(),
-				$this->typeRegistry->integer(),
-				$this->typeRegistry->boolean()
-			])
-		);
-		$this->typeRegistryBuilder->addAlias(
-			new TypeNameIdentifier('DatabaseQueryBoundParameters'),
-			$this->typeRegistry->union([
-				$this->typeRegistry->array(
-					$this->typeRegistry->withName(
-						new TypeNameIdentifier('DatabaseValue')
-					)
-				),
-				$this->typeRegistry->map(
-					$this->typeRegistry->withName(
-						new TypeNameIdentifier('DatabaseValue')
-					)
-				)
-			])
-		);
-		$this->typeRegistryBuilder->addAlias(
-			new TypeNameIdentifier('DatabaseQueryCommand'),
-			$this->typeRegistry->record([
-				'query' => $this->typeRegistry->string(1),
-				'boundParameters' => $this->typeRegistry->alias(
-					new TypeNameIdentifier('DatabaseQueryBoundParameters')
-				)
-			])
-		);
-		$this->typeRegistryBuilder->addAlias(
-			new TypeNameIdentifier('DatabaseQueryResultRow'),
-			$this->typeRegistry->map(
-				$this->typeRegistry->withName(
-					new TypeNameIdentifier('DatabaseValue')
-				)
-			)
-		);
-		$this->typeRegistryBuilder->addAlias(
-			new TypeNameIdentifier('DatabaseQueryResult'),
-			$this->typeRegistry->array(
-				$this->typeRegistry->withName(
-					new TypeNameIdentifier('DatabaseQueryResultRow')
-				)
-			)
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('DatabaseQueryFailure'),
-			$this->typeRegistry->record([
-				'query' => $this->typeRegistry->string(1),
-				'boundParameters' => $this->typeRegistry->alias(
-					new TypeNameIdentifier('DatabaseQueryBoundParameters')
-				),
-				'error' => $this->typeRegistry->string(),
-			]),
-		);
-		$this->typeRegistryBuilder->addState(
-			new TypeNameIdentifier('DatabaseConnector'),
-			$this->typeRegistry->subtype(
-				new TypeNameIdentifier('DatabaseConnection')
-			)
-		);*/
-	}
+	) {}
 
 	/** @inheritDoc */
 	public function expressionRegistry(): array {
@@ -370,8 +251,8 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program 
 			'Type' => fn(Type $refType): TypeType => $this->typeRegistry->type($refType),
 			'Function' => fn(Type $parameterType, Type $returnType): Type =>
 				$this->typeRegistry->function($parameterType, $returnType),
-			'Union' => fn(array $types, bool $normalize = true): UnionType => $this->typeRegistry->union($types, $normalize),
-			'Intersection' => fn(array $types, bool $normalize = true): IntersectionType => $this->typeRegistry->intersection($types, $normalize),
+			'Union' => fn(array $types, bool $normalize = true): Type => $this->typeRegistry->union($types, $normalize),
+			'Intersection' => fn(array $types, bool $normalize = true): Type => $this->typeRegistry->intersection($types, $normalize),
 			'Result' => fn(Type $okType, Type $errorType): Type => $this->typeRegistry->result($okType, $errorType),
 			'String' => fn(
 				int $minLength = 0,

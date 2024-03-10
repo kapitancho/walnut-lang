@@ -31,10 +31,11 @@ final readonly class StateValue implements StateValueInterface {
 	}
 
 	public function __toString(): string {
+		$sv = (string)$this->stateValue;
 		return sprintf(
-			"%s%s",
+			str_starts_with($sv, '[') ? "%s%s" : "%s{%s}",
 			$this->typeName,
-			$this->stateValue
+			$sv
 		);
 	}
 }
