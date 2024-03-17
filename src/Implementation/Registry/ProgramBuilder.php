@@ -31,11 +31,11 @@ use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Registry\DependencyContainer;
+use Walnut\Lang\Blueprint\Registry\DependencyError;
 use Walnut\Lang\Blueprint\Registry\ExpressionRegistry;
 use Walnut\Lang\Blueprint\Registry\ProgramBuilder as ProgramBuilderInterface;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Registry\TypeRegistryBuilder;
-use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
 use Walnut\Lang\Blueprint\Registry\ValueRegistry;
 use Walnut\Lang\Blueprint\Registry\ValueRegistryBuilder;
 use Walnut\Lang\Blueprint\Type\AliasType;
@@ -48,7 +48,6 @@ use Walnut\Lang\Blueprint\Type\EnumerationType;
 use Walnut\Lang\Blueprint\Type\FalseType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
-use Walnut\Lang\Blueprint\Type\IntersectionType;
 use Walnut\Lang\Blueprint\Type\MapType;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
@@ -66,7 +65,6 @@ use Walnut\Lang\Blueprint\Type\TrueType;
 use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\TypeType;
-use Walnut\Lang\Blueprint\Type\UnionType;
 use Walnut\Lang\Blueprint\Value\AtomValue;
 use Walnut\Lang\Blueprint\Value\BooleanValue;
 use Walnut\Lang\Blueprint\Value\DictValue;
@@ -338,7 +336,7 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program 
 					$value
 				),
 			'vars' => fn(): VariableValueScope => $this->valueRegistry->variables(),
-			'val' => fn(Type|string $type): Value|UnresolvableDependency =>
+			'val' => fn(Type|string $type): Value|DependencyError =>
 				$this->dependencyContainer->valueByType(
 					is_string($type) ?
 						$this->typeRegistry->withName(new TypeNameIdentifier($type)) : $type

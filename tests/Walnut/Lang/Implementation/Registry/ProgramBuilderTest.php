@@ -8,6 +8,7 @@ use Walnut\Lang\Blueprint\Expression\MatchExpressionPair;
 use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
+use Walnut\Lang\Blueprint\Registry\DependencyError;
 use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
 use Walnut\Lang\Blueprint\Type\AliasType;
 use Walnut\Lang\Blueprint\Type\AnyType;
@@ -133,9 +134,13 @@ final class ProgramBuilderTest extends BaseProgramTestHelper {
 			new TypeNameIdentifier('MyAtom')
 		), $val($NamedType('MyAtom')));
 
-		$this->assertEquals(UnresolvableDependency::notFound, $val('MyEnum'));
+		$v = $val('MyEnum');
+		$this->assertInstanceOf(DependencyError::class, $v);
+		$this->assertEquals(UnresolvableDependency::notFound, $v->unresolvableDependency);
 
-		$this->assertEquals(UnresolvableDependency::ambiguous, $val('MyStringToReal'));
+		$v = $val('MyStringToReal');
+		$this->assertInstanceOf(DependencyError::class, $v);
+		$this->assertEquals(UnresolvableDependency::ambiguous, $v->unresolvableDependency);
 
 		$this->assertEquals($this->valueRegistry->enumerationValue(
 			new TypeNameIdentifier('MySpecialEnum'),
@@ -152,10 +157,9 @@ final class ProgramBuilderTest extends BaseProgramTestHelper {
 				$Tuple([$NamedType('MySpecialEnum'), $NamedType('MyStringToInteger')])
 			)
 		);
-		$this->assertEquals(
-			UnresolvableDependency::unsupportedType,
-			$val($Tuple([$NamedType('MySpecialEnum'), $Integer()]))
-		);
+		$v = $val($Tuple([$NamedType('MySpecialEnum'), $Integer()]));
+		$this->assertInstanceOf(DependencyError::class, $v);
+		$this->assertEquals(UnresolvableDependency::unsupportedType, $v->unresolvableDependency);
 
 		$this->assertEquals(
 			"[foo: MySpecialEnum.Woo, bar: ^String => Integer :: #->Length]",
@@ -163,10 +167,9 @@ final class ProgramBuilderTest extends BaseProgramTestHelper {
 				$Record(["foo" => $NamedType('MySpecialEnum'), "bar" => $NamedType('MyStringToInteger')])
 			)
 		);
-		$this->assertEquals(
-			UnresolvableDependency::unsupportedType,
-			$val($Record(["foo" => $NamedType('MySpecialEnum'), "bar" => $Integer()]))
-		);
+		$v = $val($Record(["foo" => $NamedType('MySpecialEnum'), "bar" => $Integer()]));
+		$this->assertInstanceOf(DependencyError::class, $v);
+		$this->assertEquals(UnresolvableDependency::unsupportedType, $v->unresolvableDependency);
 	}
 
 	public function testTypeBuilder(): void {

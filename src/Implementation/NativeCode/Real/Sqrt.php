@@ -33,7 +33,7 @@ final readonly class Sqrt implements Method {
 		if ($targetType instanceof IntegerType || $targetType instanceof IntegerSubsetType ||
 			$targetType instanceof RealType || $targetType instanceof RealSubsetType
 		) {
-			$real = $this->context->typeRegistry->real(0, PlusInfinity::value);
+			$real = $this->context->typeRegistry->real(0);
 			$minValue = $targetType->range()->minValue();
 			return $minValue === MinusInfinity::value || $minValue < 0 ?
 				$this->context->typeRegistry->result(
@@ -55,7 +55,6 @@ final readonly class Sqrt implements Method {
 		Value|null $dependencyValue,
 	): Value {
 		$targetValue = $this->context->toBaseValue($targetValue);
-		$parameter = $this->context->toBaseValue($parameter);
 
 		if ($targetValue instanceof IntegerValue || $targetValue instanceof RealValue) {
 			return $this->context->valueRegistry->real(

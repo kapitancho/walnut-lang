@@ -213,6 +213,14 @@ final class CastAsTest extends BaseProgramTestHelper {
 									new EnumValueIdentifier('Completed')
 								)
 							),
+						),
+						$this->builder->expressionRegistry()['matchDefault'](
+							$this->expressionRegistry->constant(
+								$this->valueRegistry->enumerationValue(
+									new TypeNameIdentifier('OrderStatus'),
+									new EnumValueIdentifier('Invalid')
+								)
+							),
 						)
 					],
 				),

@@ -2,10 +2,15 @@
 
 namespace Walnut\Lang\Implementation\Registry;
 
+use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Type\AliasType;
+use Walnut\Lang\Blueprint\Type\EnumerationSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
+use Walnut\Lang\Blueprint\Type\RealSubsetType;
+use Walnut\Lang\Blueprint\Type\StringSubsetType;
 use Walnut\Lang\Blueprint\Type\Type;
+use Walnut\Lang\Blueprint\Value\EnumerationValue;
 use Walnut\Lang\Implementation\Type\ResultType;
 use Walnut\Lang\Implementation\Type\UnionType;
 
@@ -74,6 +79,36 @@ final readonly class UnionTypeNormalizer {
                             array_values(
                                 array_unique(
                                     array_merge($q->subsetValues(), $tx->subsetValues())
+                                )
+                            )
+                        );
+                    } else if ($q instanceof RealSubsetType && $tx instanceof RealSubsetType) {
+                        array_splice($queue, $ql, 1);
+                        $tx = $this->typeRegistry->realSubset(
+                            array_values(
+                                array_unique(
+                                    array_merge($q->subsetValues(), $tx->subsetValues())
+                                )
+                            )
+                        );
+                    } else if ($q instanceof StringSubsetType && $tx instanceof StringSubsetType) {
+                        array_splice($queue, $ql, 1);
+                        $tx = $this->typeRegistry->stringSubset(
+                            array_values(
+                                array_unique(
+                                    array_merge($q->subsetValues(), $tx->subsetValues())
+                                )
+                            )
+                        );
+                    } else if ($q instanceof EnumerationSubsetType && $tx instanceof EnumerationSubsetType &&
+	                    $q->enumeration()->name()->equals($tx->enumeration()->name())) {
+                        array_splice($queue, $ql, 1);
+                        $tx = $q->enumeration()->subsetType(
+                            array_values(
+                                array_unique(
+									array_map(fn(EnumerationValue $value): EnumValueIdentifier =>
+										$value->name(), array_merge($q->subsetValues(), $tx->subsetValues())
+									)
                                 )
                             )
                         );

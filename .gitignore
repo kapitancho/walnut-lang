@@ -2,3 +2,7 @@
 .idea
 composer.lock
 vendor
+walnut-src
+public
+dev
+db.sqlite

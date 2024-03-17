@@ -188,7 +188,7 @@ final class ToStringTest extends BaseProgramTestHelper {
 		$this->assertEquals('Null', (string)$Null());
 		$this->assertEquals('Mutable<True>', (string)$Mutable($True()));
 		$this->assertEquals('^True => String', (string)$Function($True(), $String()));
-		$this->assertEquals('(True|False)', (string)$Union([$True(), $False()]));
+		$this->assertEquals('Boolean', (string)$Union([$True(), $False()]));
 		$this->assertEquals('(True&False)', (string)$Intersection([$True(), $False()]));
 		$this->assertEquals('Result<True, False>', (string)$Result($True(), $False()));
 		$this->assertEquals('Type<True>', (string)$Type($True()));

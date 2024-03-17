@@ -41,6 +41,7 @@ final readonly class Uuid implements Method {
 		if ($targetValue instanceof AtomValue && $targetValue->type()->name()->equals(
 			new TypeNameIdentifier('Random')
 		)) {
+			/** @noinspection PhpUnhandledExceptionInspection */
 			$arr = (array)array_values(unpack('N1a/n4b/N1c', random_bytes(16)));
 			$source = (int)(microtime(true) * 0x10000);
 			$arr[0] = $source >> 16;

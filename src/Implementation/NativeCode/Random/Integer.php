@@ -81,6 +81,7 @@ final readonly class Integer implements Method {
 					$from instanceof IntegerValue &&
 					$to instanceof IntegerValue
 				) {
+					/** @noinspection PhpUnhandledExceptionInspection */
 					return $this->context->valueRegistry->integer(random_int($from->literalValue(), $to->literalValue()));
 				}
 			}

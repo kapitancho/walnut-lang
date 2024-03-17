@@ -4,8 +4,8 @@ namespace Walnut\Lang\Implementation\Registry;
 
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Registry\DependencyContainer as DependencyContainerInterface;
+use Walnut\Lang\Blueprint\Registry\DependencyError;
 use Walnut\Lang\Blueprint\Registry\ProgramBuilder as ProgramBuilderInterface;
-use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Function\MainMethodRegistry;
@@ -55,7 +55,7 @@ final readonly class ProgramBuilderFactory implements DependencyContainerInterfa
 			$this->dependencyContainer
 		);
 	}
-	public function valueByType(Type $type): Value|UnresolvableDependency {
+	public function valueByType(Type $type): Value|DependencyError {
 		return $this->dependencyContainer->valueByType($type);
 	}
 

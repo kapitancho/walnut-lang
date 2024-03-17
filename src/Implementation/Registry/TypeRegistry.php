@@ -131,10 +131,6 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder {
 		$this->stateTypes = [];
     }
 
-    private function namedType(TypeNameIdentifier $typeName): ProxyNamedType {
-        return new ProxyNamedType($typeName, $this);
-    }
-
     public function any(): AnyType {
         return $this->anyType;
     }

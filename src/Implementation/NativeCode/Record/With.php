@@ -99,11 +99,11 @@ final readonly class With implements Method {
 						if ($callValue instanceof ErrorValue) {
 							return $callValue;
 						}
+						$result = $this->context->valueRegistry->subtypeValue(
+							$originalValue->type()->name(),
+							$callValue
+						);
 					}
-					$result = $this->context->valueRegistry->subtypeValue(
-						$originalValue->type()->name(),
-						$callValue
-					);
 				}
 				return $result;
 			}

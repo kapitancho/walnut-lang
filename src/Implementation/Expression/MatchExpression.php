@@ -47,6 +47,10 @@ final readonly class MatchExpression implements MatchExpressionInterface {
 
 		$expressionTypes = [];
 		$returnTypes = [$retTarget->returnType];
+		$hasDefaultMatch = false;
+		$hasDynamicTypes = false;
+
+		$refTypes = [];
 
 		foreach($this->pairs as $pair) {
 			$innerScope = $variableScope;
@@ -54,6 +58,21 @@ final readonly class MatchExpression implements MatchExpressionInterface {
 			if ($pair instanceof MatchExpressionPair) {
 				$matchResult = $pair->matchExpression->analyse($innerScope);
 				$innerScope = $matchResult->variableScope;
+
+				if ($this->operation instanceof MatchExpressionIsSubtypeOf && $matchResult->expressionType instanceof TypeType) {
+					if ($pair->matchExpression instanceof ConstantExpression && $pair->matchExpression->value() instanceof TypeValue) {
+						$refTypes[] = $pair->matchExpression->value()->typeValue();
+					} else {
+						$hasDynamicTypes = true;
+					}
+				}
+				if ($this->operation instanceof MatchExpressionEquals) {
+					if ($pair->matchExpression instanceof ConstantExpression) {
+						$refTypes[] = $pair->matchExpression->value()->type();
+					} else {
+						$hasDynamicTypes = true;
+					}
+				}
 
 				if ($this->target instanceof VariableNameExpression) {
 					if ($this->operation instanceof MatchExpressionIsSubtypeOf && $matchResult->expressionType instanceof TypeType) {
@@ -73,11 +92,20 @@ final readonly class MatchExpression implements MatchExpressionInterface {
 						);
 					}
 				}
+			} else {
+				$hasDefaultMatch = true;
 			}
 			$retValue = $pair->valueExpression->analyse($innerScope);
 
 			$expressionTypes[] = $retValue->expressionType;
 			$returnTypes[] = $retValue->returnType;
+		}
+		if (!$hasDefaultMatch) {
+			if ($hasDynamicTypes || !$retTarget->expressionType->isSubtypeOf(
+				$this->typeRegistry->union($refTypes)
+			)) {
+				$expressionTypes[] = $this->typeRegistry->null();
+			}
 		}
 		return new ExecutionResultContext(
 			$this->typeRegistry->union($expressionTypes),

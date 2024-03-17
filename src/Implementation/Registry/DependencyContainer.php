@@ -13,6 +13,7 @@ use Walnut\Lang\Blueprint\Identifier\MethodNameIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\DependencyContainer as DependencyContainerInterface;
+use Walnut\Lang\Blueprint\Registry\DependencyError;
 use Walnut\Lang\Blueprint\Registry\ExpressionRegistry;
 use Walnut\Lang\Blueprint\Registry\MethodRegistry;
 use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
@@ -32,7 +33,7 @@ use Walnut\Lang\Implementation\Execution\VariableValueScope;
 
 final class DependencyContainer implements DependencyContainerInterface {
 
-	/** @var SplObjectStorage<Type, Value|UnresolvableDependency> */
+	/** @var SplObjectStorage<Type, Value|DependencyError> */
 	private SplObjectStorage $cache;
 	/** @var SplObjectStorage<Type> */
 	private SplObjectStorage $visited;
@@ -57,7 +58,7 @@ final class DependencyContainer implements DependencyContainerInterface {
 		);
 	}
 
-	private function findInGlobalScope(Type $type): Value|UnresolvableDependency {
+	private function findInGlobalScope(Type $type): Value|DependencyError {
 		$found = [];
 		foreach($this->valueRegistry->variables()->all() as $typedValue) {
 			if ($typedValue->type->isSubTypeOf($type)) {
@@ -65,13 +66,13 @@ final class DependencyContainer implements DependencyContainerInterface {
 			}
 		}
 		return match(true) {
-			count($found) === 0 => UnresolvableDependency::notFound,
+			count($found) === 0 => new DependencyError(UnresolvableDependency::notFound, $type),
 			count($found) === 1 => $found[0],
-			default => UnresolvableDependency::ambiguous
+			default => new DependencyError(UnresolvableDependency::ambiguous, $type)
 		};
 	}
 
-	private function findValueByNamedType(NamedType $type): Value|UnresolvableDependency {
+	private function findValueByNamedType(NamedType $type): Value|DependencyError {
 		$found = $this->findInGlobalScope($type);
 		if ($found instanceof Value) {
 			return $found;
@@ -90,7 +91,10 @@ final class DependencyContainer implements DependencyContainerInterface {
 			if ($result instanceof ErrorValue && $result->errorValue() instanceof StateValue &&
 				$result->errorValue()->type()->name()->equals(new TypeNameIdentifier('CastNotAvailable'))
 			) {
-				if ($found === UnresolvableDependency::notFound && $type instanceof AliasType) {
+				if ($found instanceof DependencyError &&
+					$found->unresolvableDependency === UnresolvableDependency::notFound &&
+					$type instanceof AliasType
+				) {
 					return $this->attemptToFindAlias($type);
 				}
 				return $found;
@@ -101,16 +105,16 @@ final class DependencyContainer implements DependencyContainerInterface {
 		}
 	}
 
-	private function attemptToFindAlias(AliasType $aliasType): Value|UnresolvableDependency {
+	private function attemptToFindAlias(AliasType $aliasType): Value|DependencyError {
 		$baseType = $aliasType->aliasedType();
 		return $this->findValueByType($baseType);
 	}
 
-	private function findTupleValue(TupleType $tupleType): Value|UnresolvableDependency {
+	private function findTupleValue(TupleType $tupleType): Value|DependencyError {
 		$found = [];
 		foreach($tupleType->types() as $type) {
 			$foundValue = $this->valueByType($type);
-			if ($foundValue instanceof UnresolvableDependency) {
+			if ($foundValue instanceof DependencyError) {
 				return $foundValue;
 			}
 			$found[] = $foundValue;
@@ -118,11 +122,11 @@ final class DependencyContainer implements DependencyContainerInterface {
 		return $this->valueRegistry->list($found);
 	}
 
-	private function findRecordValue(RecordType $recordType): Value|UnresolvableDependency {
+	private function findRecordValue(RecordType $recordType): Value|DependencyError {
 		$found = [];
 		foreach($recordType->types() as $key => $field) {
 			$foundValue = $this->valueByType($field);
-			if ($foundValue instanceof UnresolvableDependency) {
+			if ($foundValue instanceof DependencyError) {
 				return $foundValue;
 			}
 			$found[$key] = $foundValue;
@@ -130,9 +134,9 @@ final class DependencyContainer implements DependencyContainerInterface {
 		return $this->valueRegistry->dict($found);
 	}
 
-    private function findSubtypeValue(SubtypeType $type): Value|UnresolvableDependency {
+    private function findSubtypeValue(SubtypeType $type): Value|DependencyError {
         $found = $this->findValueByNamedType($type);
-        if ($found instanceof UnresolvableDependency) {
+        if ($found instanceof DependencyError) {
             $baseValue = $this->findValueByType($type->baseType());
             if ($baseValue instanceof Value) {
                 $result = $type->constructorBody()->expression()->execute(
@@ -144,7 +148,7 @@ final class DependencyContainer implements DependencyContainerInterface {
                     )
                 );
                 if ($result->value() instanceof ErrorValue) {
-                    return UnresolvableDependency::errorWhileCreatingValue;
+                    return new DependencyError(UnresolvableDependency::errorWhileCreatingValue, $type);
                 }
                 return $this->valueRegistry->subtypeValue(
                     $type->name(),
@@ -155,9 +159,9 @@ final class DependencyContainer implements DependencyContainerInterface {
         return $found;
     }
 
-    private function findStateValue(StateType $type): Value|UnresolvableDependency {
+    private function findStateValue(StateType $type): Value|DependencyError {
         $found = $this->findValueByNamedType($type);
-        if ($found instanceof UnresolvableDependency) {
+        if ($found instanceof DependencyError) {
             $constructor = $this->valueRegistry->atom(new TypeNameIdentifier('Constructor'));
             $method = $this->methodRegistry->method($constructor->type(),
                 $methodName = new MethodNameIdentifier($type->name()->identifier));
@@ -170,8 +174,13 @@ final class DependencyContainer implements DependencyContainerInterface {
                         $baseValue
                     );
                 }
-            } elseif ($method instanceof CustomMethod) {
+				return $found;
+            }
+			if ($method instanceof CustomMethod) {
                 $baseValue = $this->findValueByType($method->parameterType());
+				if ($baseValue instanceof DependencyError) {
+					return $found;
+				}
                 $stateValue = $this->expressionRegistry->methodCall(
                     $this->expressionRegistry->constant($constructor),
                     $methodName,
@@ -186,47 +195,12 @@ final class DependencyContainer implements DependencyContainerInterface {
                     $type->name(),
                     $stateValue
                 );
-            } else {
-
-            }
-
-            $this->expressionRegistry->methodCall(
-                $this->expressionRegistry->constant($constructorType),
-                new MethodNameIdentifier($type->name()),
-                $this->expressionRegistry->variableName(new VariableNameIdentifier('#'))
-            );
-
-            
-            $baseValue = $this->findValueByType($type->stateType());
-            if ($baseValue instanceof Value) {
-
-                if ($method instanceof Method) {
-                    $retParamValue = $method->execute(
-                        $constructorType->value(),
-                        $retParamValue,
-                        null
-                    );
-                    if ($retParamValue instanceof ErrorValue) {
-                        return $retParam->withTypedValue(TypedValue::forValue($retParamValue));
-                    }
-                }
-                if ($baseType instanceof RecordType && $retParamValue instanceof ListValue) {
-                    $retParamValue = $this->getTupleAsRecord(
-                        $this->valueRegistry,
-                        $retParamValue,
-                        $baseType,
-                    );
-                }
-                return $this->valueRegistry->stateValue(
-                    $type->name(),
-                    $baseValue
-                );
             }
         }
         return $found;
     }
 
-	private function findValueByType(Type $type): Value|UnresolvableDependency {
+	private function findValueByType(Type $type): Value|DependencyError {
 		return match(true) {
 			$type instanceof AtomType => $type->value(),
             $type instanceof SubtypeType => $this->findSubtypeValue($type),
@@ -234,13 +208,13 @@ final class DependencyContainer implements DependencyContainerInterface {
 			$type instanceof NamedType => $this->findValueByNamedType($type),
 			$type instanceof TupleType => $this->findTupleValue($type),
 			$type instanceof RecordType => $this->findRecordValue($type),
-			default => UnresolvableDependency::unsupportedType
+			default => new DependencyError(UnresolvableDependency::unsupportedType, $type)
 		};
 	}
 
-	public function valueByType(Type $type): Value|UnresolvableDependency {
+	public function valueByType(Type $type): Value|DependencyError {
 		if ($this->visited->contains($type)) {
-			return UnresolvableDependency::circularDependency;
+			return new DependencyError(UnresolvableDependency::circularDependency, $type);
 		}
 		$cached = $this->cache[$type] ?? null;
 		if ($cached) {
@@ -248,6 +222,9 @@ final class DependencyContainer implements DependencyContainerInterface {
 		}
 		$this->visited->attach($type);
 		$result = $this->findValueByType($type);
+		if ((!$result instanceof DependencyError) && !$result->type()->isSubtypeOf($type)) {
+			$result = new DependencyError(UnresolvableDependency::errorWhileCreatingValue, $type);
+		}
 		$this->cache[$type] = $result;
 		$this->visited->detach($type);
 		return $result;

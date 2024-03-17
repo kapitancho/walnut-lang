@@ -1,8 +1,6 @@
 <?php
 /** @noinspection UnknownInspectionInspection */
 /** @noinspection PhpUnusedParameterInspection */
-/** @noinspection StaticClosureCanBeUsedInspection */
-/** @noinspection AutoloadingIssuesInspection */
 
 namespace Walnut\Lang\Implementation\Compilation;
 
@@ -333,6 +331,10 @@ final readonly class ParserStateMachine {
 				}
 			]],
 			144 => ['name' => 'constructor method body', 'transitions' => [
+				T::error_marker->name => function(LT $token) {
+					$this->s->push(147);
+					$this->s->move(701);
+				},
 				T::dependency_marker->name => function(LT $token) {
 					$this->s->push(152);
 					$this->s->move(701);
@@ -344,12 +346,16 @@ final readonly class ParserStateMachine {
 			]],
 			145 => ['name' => 'constructor method result', 'transitions' => [
 				'' => function(LT $token) {
+					$returnType = $this->programBuilder->typeRegistry()['TypeByName']($this->s->result['typeName'])->stateType();
+					$errorType = $this->s->result['error_type'] ?? null;
 					$this->s->generated = $this->programBuilder->methodBuilder()['addMethod'](
 						$this->programBuilder->typeRegistry()['TypeByName']('Constructor'),
 						$this->s->result['typeName'],
 						$this->s->result['parameter_type'],
 						$this->s->result['dependency_type'] ?? null,
-						$this->programBuilder->typeRegistry()['TypeByName']($this->s->result['typeName'])->stateType(),
+						$errorType ? $this->programBuilder->typeRegistry()['Result'](
+							$returnType, $errorType
+						) : $returnType,
 						$this->programBuilder->expressionRegistry()['functionBody']($this->s->generated),
 					);
 					$this->s->move(102);
@@ -360,6 +366,22 @@ final readonly class ParserStateMachine {
 					$this->s->result['parameter_type'] = $this->s->generated;
 					$this->s->stay(144);
 				}
+			]],
+			147 => ['name' => 'constructor method error type', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->result['error_type'] = $this->s->generated;
+					$this->s->stay(148);
+				}
+			]],
+			148 => ['name' => 'constructor method body after error type', 'transitions' => [
+				T::dependency_marker->name => function(LT $token) {
+					$this->s->push(152);
+					$this->s->move(701);
+				},
+				T::function_body_marker->name => function(LT $token) {
+					$this->s->push(145);
+					$this->s->move(201);
+				},
 			]],
 			151 => ['name' => 'method dependency result', 'transitions' => [
 				T::function_body_marker->name => function(LT $token) {
@@ -671,6 +693,20 @@ final readonly class ParserStateMachine {
 					$this->s->result = [];
 					$this->s->result['expression_left'] = $this->s->generated;
 					$this->s->stay(313);
+				},
+				T::empty_tuple->name => function(LT $token) {
+					$this->s->generated = $this->programBuilder->expressionRegistry()['call'](
+						$this->s->generated,
+						$this->programBuilder->expressionRegistry()['constant']($this->programBuilder->valueRegistry()['list']([]))
+					);
+					$this->s->move(315);
+				},
+				T::empty_record->name => function(LT $token) {
+					$this->s->generated = $this->programBuilder->expressionRegistry()['call'](
+						$this->s->generated,
+						$this->programBuilder->expressionRegistry()['constant']($this->programBuilder->valueRegistry()['dict']([]))
+					);
+					$this->s->move(315);
 				},
 				T::arithmetic_op->name => $c = function(LT $token) {
 					if ($token->patternMatch->text === '$') {
@@ -1312,6 +1348,7 @@ final readonly class ParserStateMachine {
 						'Type' => 760,
 						'Mutable' => 770,
 						'Result' => 780,
+						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
 						default => 789
 					};
@@ -1328,6 +1365,7 @@ final readonly class ParserStateMachine {
 						'Type' => 760,
 						'Mutable' => 770,
 						'Result' => 780,
+						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
 						default => 790
 					};
@@ -1720,6 +1758,41 @@ final readonly class ParserStateMachine {
 			774 => ['name' => 'type mutable return', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->generated = $this->programBuilder->typeRegistry()['Mutable'](
+						$this->s->result['type'] ?? $this->programBuilder->typeRegistry()['Any'](),
+					);
+					$this->s->pop();
+				},
+			]],
+
+			775 => ['name' => 'type error', 'transitions' => [
+				T::type_start->name => 776,
+				'' => function(LT $token) {
+					$this->s->pop();
+					$this->s->generated = $this->programBuilder->typeRegistry()['Result'](
+						$this->programBuilder->typeRegistry()['Nothing'](),
+						$this->programBuilder->typeRegistry()['Any'](),
+					);
+				},
+			]],
+			776 => ['name' => 'type error type', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->push(777);
+					$this->s->stay(701);
+				},
+			]],
+			777 => ['name' => 'type error return point', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->result['type'] = $this->s->generated;
+					$this->s->stay(778);
+				}
+			]],
+			778 => ['name' => 'type error separator', 'transitions' => [
+				T::type_end->name => 779
+			]],
+			779 => ['name' => 'type error return', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->generated = $this->programBuilder->typeRegistry()['Result'](
+						$this->programBuilder->typeRegistry()['Nothing'](),
 						$this->s->result['type'] ?? $this->programBuilder->typeRegistry()['Any'](),
 					);
 					$this->s->pop();

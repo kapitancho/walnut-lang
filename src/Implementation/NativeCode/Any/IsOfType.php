@@ -8,6 +8,7 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Type\Type as TypeInterface;
 use Walnut\Lang\Blueprint\Type\TypeType;
+use Walnut\Lang\Blueprint\Value\SubtypeValue;
 use Walnut\Lang\Blueprint\Value\TypeValue;
 use Walnut\Lang\Blueprint\Value\Value;
 
@@ -30,6 +31,11 @@ final readonly class IsOfType implements Method {
 		// @codeCoverageIgnoreEnd
 	}
 
+	private function isSubtypeOf(Value $targetValue, TypeInterface $type): bool {
+		return $targetValue->type()->isSubtypeOf($type) ||
+			($targetValue instanceof SubtypeValue && $this->isSubtypeOf($targetValue->baseValue(), $type));
+	}
+
 	public function execute(
 		Value $targetValue,
 		Value $parameter,
@@ -37,7 +43,7 @@ final readonly class IsOfType implements Method {
 	): Value {
 		if ($parameter instanceof TypeValue) {
 			return $this->context->valueRegistry->boolean(
-				$targetValue->type()->isSubtypeOf($parameter->typeValue())
+				$this->isSubtypeOf($targetValue, $parameter->typeValue())
 			);
 		}
 		// @codeCoverageIgnoreStart

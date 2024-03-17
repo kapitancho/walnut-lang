@@ -235,7 +235,7 @@ final class IsOfTypeTest extends BaseProgramTestHelper {
 		$this->callIsOfType($v3, $t2, true);
 		$this->callIsOfType($v4, $t2, false);
 		$this->callIsOfType($v1, $t3, false);
-		$this->callIsOfType($v2, $t3, false);
+		$this->callIsOfType($v2, $t3, true);
 		$this->callIsOfType($v3, $t3, true);
 		$this->callIsOfType($v4, $t3, true);
 		$this->callIsOfType($v1, $t4, true);

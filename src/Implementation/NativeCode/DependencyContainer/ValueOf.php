@@ -62,8 +62,9 @@ final readonly class ValueOf implements Method {
 						new TypeNameIdentifier('DependencyContainerError'),
 						$this->context->valueRegistry->dict([
 							'targetType' => $this->context->valueRegistry->type($type),
+							'errorOnType' => $this->context->valueRegistry->type($result->type),
 							'errorMessage' => $this->context->valueRegistry->string(
-								match($result) {
+								match($result->unresolvableDependency) {
 									UnresolvableDependency::circularDependency => 'Circular dependency',
 									UnresolvableDependency::ambiguous => 'Ambiguous dependency',
 									UnresolvableDependency::notFound => 'Dependency not found',

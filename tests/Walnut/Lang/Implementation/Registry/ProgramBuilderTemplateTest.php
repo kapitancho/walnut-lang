@@ -435,7 +435,7 @@ final class ProgramBuilderTemplateTest extends BaseProgramTestHelper {
 	public function testCast120(): void { //container instanceOf
 		$this->testWith(__DIR__ . "/cast120.php",
 			"[[host: 'localhost', database: 'db', username: 'user', password: 'pass'], " .
-			"@DependencyContainerError[targetType: type{String}, errorMessage: 'Unsupported type']]");
+			"@DependencyContainerError[targetType: type{String}, errorOnType: type{String}, errorMessage: 'Unsupported type']]");
 	}
 
 	public function testCast121(): void { //custom methods as constructors

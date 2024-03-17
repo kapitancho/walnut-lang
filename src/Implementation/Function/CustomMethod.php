@@ -14,12 +14,14 @@ use Walnut\Lang\Blueprint\Identifier\MethodNameIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\DependencyContainer;
+use Walnut\Lang\Blueprint\Registry\DependencyError;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
 use Walnut\Lang\Blueprint\Registry\ValueRegistry;
 use Walnut\Lang\Blueprint\Type\RecordType;
 use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Type\Type;
+use Walnut\Lang\Blueprint\Value\ListValue;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Execution\VariableScope;
 use Walnut\Lang\Implementation\Execution\VariableValueScope;
@@ -96,6 +98,9 @@ final readonly class CustomMethod implements CustomMethodInterface {
 		return $this->methodName;
 	}
 
+	/**
+	 * @psalm-immutable
+	 */
 	public function parameterType(): Type {
 		return $this->parameterType;
 	}
@@ -116,7 +121,9 @@ final readonly class CustomMethod implements CustomMethodInterface {
 		if (!$targetType->isSubtypeOf($this->targetType)) {
 			throw new AnalyserException(
 				sprintf(
-					"[analysing the call to {$this->targetType}->{$this->methodName}]: Invalid target type: %s should be a subtype of %s",
+					"[analysing the call to %s->%s]: Invalid target type: %s should be a subtype of %s",
+					$this->targetType,
+					$this->methodName,
 					$targetType,
 					$this->targetType
 				)
@@ -130,12 +137,15 @@ final readonly class CustomMethod implements CustomMethodInterface {
 			)
 		))) {
 			throw new AnalyserException(sprintf(
-				"[analysing the call to {$this->targetType}->{$this->methodName}]: Invalid parameter type: %s should be a subtype of %s", $parameterType, $this->parameterType));
+				"[analysing the call to %s->%s]: Invalid parameter type: %s should be a subtype of %s",
+				$this->targetType, $this->methodName, $parameterType, $this->parameterType));
 		}
 		if ($dependencyType !== null && !$dependencyType->isSubtypeOf($this->dependencyType)) {
 			throw new AnalyserException(
 				sprintf(
-					"[analysing the call to {$this->targetType}->{$this->methodName}]: Invalid dependency type: %s should be a subtype of %s",
+					"[analysing the call to %s->%s]: Invalid dependency type: %s should be a subtype of %s",
+					$this->targetType,
+					$this->methodName,
 					$dependencyType,
 					$this->dependencyType
 				)
@@ -146,6 +156,14 @@ final readonly class CustomMethod implements CustomMethodInterface {
 
 	public function execute(Value $targetValue, Value $parameter, Value|null $dependencyValue): Value {
 		try {
+			if ($parameter instanceof ListValue && $this->parameterType instanceof RecordType) {
+				$parameter = $this->getTupleAsRecord(
+					$this->valueRegistry,
+					$parameter,
+					$this->parameterType,
+				);
+			}
+
 			$pairs = [
 				new VariableValuePair(
 					new VariableNameIdentifier('#'),
@@ -164,14 +182,15 @@ final readonly class CustomMethod implements CustomMethodInterface {
 			];
 			if ($this->dependencyType) {
 				$dep = $dependencyValue ?? $this->dependencyContainer->valueByType($this->dependencyType);
-				if ($dep instanceof UnresolvableDependency) {
+				if ($dep instanceof DependencyError) {
 					return $this->valueRegistry->error(
 						$this->valueRegistry->stateValue(
 							new TypeNameIdentifier('DependencyContainerError'),
 							$this->valueRegistry->dict([
 								'targetType' => $this->valueRegistry->type($this->dependencyType),
+								'errorOnType' => $this->valueRegistry->type($dep->type),
 								'errorMessage' => $this->valueRegistry->string(
-									match($dep) {
+									match($dep->unresolvableDependency) {
 										UnresolvableDependency::circularDependency => 'Circular dependency',
 										UnresolvableDependency::ambiguous => 'Ambiguous dependency',
 										UnresolvableDependency::notFound => 'Dependency not found',
