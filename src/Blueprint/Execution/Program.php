@@ -7,6 +7,7 @@ use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\Value;
 
 interface Program {
+	public function analyse(): void;
 	public function callFunction(
 		VariableNameIdentifier $functionName,
 		Type $expectedParameterType,

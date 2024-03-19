@@ -5,6 +5,8 @@
 namespace Walnut\Lang\Implementation\Compilation;
 
 use Walnut\Lang\Blueprint\Compilation\ModuleImporter;
+use Walnut\Lang\Blueprint\Expression\Expression;
+use Walnut\Lang\Blueprint\Expression\MethodCallExpression;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Registry\ProgramBuilder;
@@ -721,7 +723,7 @@ final readonly class ParserStateMachine {
 						'*' => 'binaryMultiply',
 						'/' => 'binaryDivide',
 						'%' => 'binaryModulo',
-						'**' => 'binaryPower',
+						'^' => 'binaryPower',
 						'<' => 'binaryLessThan',
 						'<=' => 'binaryLessThanEqual',
 						'>' => 'binaryGreaterThan',
@@ -733,6 +735,7 @@ final readonly class ParserStateMachine {
 					};
 					$this->s->move(316);
 				},
+				T::lambda_param->name => $c,
 				T::boolean_op->name => $c,
 				T::less_than_equal->name => $c,
 				T::greater_than_equal->name => $c,
@@ -922,17 +925,22 @@ final readonly class ParserStateMachine {
 			316 => ['name' => 'method call arithmetic start', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->push(317);
-					$this->s->stay(301);
+					$this->s->stay(201);
 				}
 			]],
 			317 => ['name' => 'method call arithmetic value', 'transitions' => [
 				'' => function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
+					$this->s->generated = $this->priorityMatch(
 						$this->s->result['expression_left'],
 						$this->s->result['method_name'],
 						$this->s->generated
 					);
-					$this->s->stay(302);
+					/*$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
+						$this->s->result['expression_left'],
+						$this->s->result['method_name'],
+						$this->s->generated
+					);*/
+					$this->s->stay(315);
 				}
 			]],
 
@@ -2102,5 +2110,41 @@ final readonly class ParserStateMachine {
 				}
 			]]
 		];		
+	}
+
+	private const priorities = [
+		'binaryPlus' => 5,
+		'binaryMinus' => 5,
+		'binaryMultiply' => 8,
+		'binaryDivide' => 8,
+		'binaryModulo' => 8,
+		'binaryPower' => 10,
+		'binaryLessThan' => 4,
+		'binaryLessThanEqual' => 4,
+		'binaryGreaterThan' => 4,
+		'binaryGreaterThanEqual' => 4,
+		'binaryNotEqual' => 3,
+		'binaryEqual' => 3,
+		'binaryOr' => 1,
+		'binaryAnd' => 2,
+	];
+
+	private function priorityMatch(Expression $l, string $m, Expression $g): Expression {
+		if ($g instanceof MethodCallExpression) {
+			$gm = $g->methodName();
+			$gmId = $gm->identifier;
+			if (str_starts_with($gmId, 'binary')) {
+				if ((self::priorities[$m] ?? 0) >= (self::priorities[$gmId] ?? 0)) {
+					return $this->programBuilder->expressionRegistry()['method'](
+						$this->programBuilder->expressionRegistry()['method'](
+							$l, $m, $g->target()
+						),
+						$gmId,
+						$g->parameter()
+					);
+				}
+			}
+		}
+		return $this->programBuilder->expressionRegistry()['method']($l, $m, $g);
 	}
 }

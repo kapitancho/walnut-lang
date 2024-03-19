@@ -374,14 +374,18 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program,
 		return $this;
 	}
 
+	public function analyse(): void {
+		$this->valueRegistryBuilder->analyse();
+		$this->typeRegistryBuilder->analyse();
+		$this->customMethodRegistryBuilder->analyse();
+	}
+
 	private function analyseAndFindEntryPoint(
 		VariableNameIdentifier $functionName,
 		Type $expectedParameterType,
 		Type $expectedReturnType
 	): FunctionValue {
-		$this->valueRegistryBuilder->analyse();
-		$this->typeRegistryBuilder->analyse();
-		$this->customMethodRegistryBuilder->analyse();
+		$this->analyse();
 
 		$entryPoint = $this->valueRegistry->variables()->findValueOf($functionName);
 		if ($entryPoint instanceof FunctionValue) {
