@@ -723,7 +723,9 @@ final readonly class ParserStateMachine {
 						'%' => 'binaryModulo',
 						'**' => 'binaryPower',
 						'<' => 'binaryLessThan',
+						'<=' => 'binaryLessThanEqual',
 						'>' => 'binaryGreaterThan',
+						'>=' => 'binaryGreaterThanEqual',
 						'!=' => 'binaryNotEqual',
 						'==' => 'binaryEqual',
 						'||' => 'binaryOr',
@@ -732,6 +734,8 @@ final readonly class ParserStateMachine {
 					$this->s->move(316);
 				},
 				T::boolean_op->name => $c,
+				T::less_than_equal->name => $c,
+				T::greater_than_equal->name => $c,
 				T::equals->name => $c,
 				T::not_equals->name => $c,
 				T::this_var->name => $c,
@@ -762,6 +766,8 @@ final readonly class ParserStateMachine {
 					$this->s->stay(302);
 				},
 				T::boolean_op->name => $c,
+				T::less_than_equal->name => $c,
+				T::greater_than_equal->name => $c,
 				T::arithmetic_op->name => $c,
 				T::equals->name => $c,
 				T::not_equals->name => $c,
@@ -916,7 +922,7 @@ final readonly class ParserStateMachine {
 			316 => ['name' => 'method call arithmetic start', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->push(317);
-					$this->s->stay(201);
+					$this->s->stay(301);
 				}
 			]],
 			317 => ['name' => 'method call arithmetic value', 'transitions' => [
@@ -926,7 +932,7 @@ final readonly class ParserStateMachine {
 						$this->s->result['method_name'],
 						$this->s->generated
 					);
-					$this->s->stay(315);
+					$this->s->stay(302);
 				}
 			]],
 
