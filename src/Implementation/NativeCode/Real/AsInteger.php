@@ -8,6 +8,8 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
+use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
+use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
 use Walnut\Lang\Blueprint\Type\RealType;
 use Walnut\Lang\Blueprint\Type\Type;
@@ -27,7 +29,8 @@ final readonly class AsInteger implements Method {
 		Type|null $dependencyType,
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
-		if ($targetType instanceof RealType || $targetType instanceof RealSubsetType) {
+		if ($targetType instanceof IntegerType || $targetType instanceof IntegerSubsetType ||
+			$targetType instanceof RealType || $targetType instanceof RealSubsetType) {
 			return $this->context->typeRegistry->integer(
 				$targetType->range()->minValue() === MinusInfinity::value ? MinusInfinity::value :
 					(int)$targetType->range()->minValue(),

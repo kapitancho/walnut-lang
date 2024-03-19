@@ -7,6 +7,8 @@ use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
+use Walnut\Lang\Blueprint\Range\MinusInfinity;
+use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Type\ArrayType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\TupleType;
@@ -28,13 +30,34 @@ final readonly class Item implements Method {
 		Type|null $dependencyType,
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
-		if ($targetType instanceof TupleType) {
-			$targetType = $targetType->asArrayType();
-		}
-		if ($targetType instanceof ArrayType) {
+		$type = $targetType instanceof TupleType ? $targetType->asArrayType() : $targetType;
+		if ($type instanceof ArrayType) {
 			if ($parameterType instanceof IntegerType || $parameterType instanceof IntegerSubsetType) {
-				$returnType = $targetType->itemType();
-				return $targetType->range()->minLength() > $parameterType->range()->maxValue() ? $returnType :
+				$returnType = $type->itemType();
+				if ($targetType instanceof TupleType) {
+					$min = $parameterType->range()->minValue();
+					$max = $parameterType->range()->maxValue();
+					if ($min !== MinusInfinity::value && $min >= 0) {
+						if ($parameterType instanceof IntegerType) {
+							$isWithinLimit = $max !== PlusInfinity::value && $max < count($targetType->types());
+							$returnType = $this->context->typeRegistry->union(
+								$isWithinLimit ?
+								array_slice($targetType->types(), $min, $max - $min + 1) :
+								[... array_slice($targetType->types(), $min), $targetType->restType()]
+							);
+						} elseif ($parameterType instanceof IntegerSubsetType) {
+							$returnType = $this->context->typeRegistry->union(
+								array_map(
+									fn(IntegerValue $value) =>
+										$targetType->types()[$value->literalValue()] ?? $targetType->restType(),
+									$parameterType->subsetValues()
+								)
+							);
+						}
+					}
+				}
+
+				return $type->range()->minLength() > $parameterType->range()->maxValue() ? $returnType :
 					$this->context->typeRegistry->result(
 						$returnType,
 						$this->context->typeRegistry->state(

@@ -683,6 +683,13 @@ final readonly class ParserStateMachine {
 				},
 				T::method_marker->name => function(LT $token) {
 					$this->s->result = [];
+					$this->s->result['is_no_error'] = false;
+					$this->s->result['expression_left'] = $this->s->generated;
+					$this->s->move(305);
+				},
+				T::lambda_return->name => function(LT $token) {
+					$this->s->result = [];
+					$this->s->result['is_no_error'] = true;
 					$this->s->result['expression_left'] = $this->s->generated;
 					$this->s->move(305);
 				},
@@ -762,6 +769,7 @@ final readonly class ParserStateMachine {
 				T::false->name => $c,
 				T::null->name => $c,
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				T::positive_integer_number->name => $c,
 			]],
 			304 => ['name' => 'property name next', 'transitions' => [
@@ -778,6 +786,7 @@ final readonly class ParserStateMachine {
 				T::this_var->name => $c,
 				T::special_var->name => $c,
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				T::call_start->name => $c,
 				T::tuple_start->name => $c,
 				T::tuple_end->name => $c,
@@ -803,20 +812,13 @@ final readonly class ParserStateMachine {
 					$this->s->stay(309);
 				},
 				T::property_accessor->name => $c = function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
-						$this->s->result['expression_left'],
-						$this->s->result['method_name'],
-						$this->programBuilder->expressionRegistry()['constant']($this->programBuilder->valueRegistry()['null']())
-					);
+					$this->noErrorMethodCall(false);
 					$this->s->stay(302);
 				},
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				'' => function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
-						$this->s->result['expression_left'],
-						$this->s->result['method_name'],
-						$this->programBuilder->expressionRegistry()['constant']($this->programBuilder->valueRegistry()['null']())
-					);
+					$this->noErrorMethodCall(false);
 					$this->s->pop();
 				},
 			]],
@@ -828,11 +830,7 @@ final readonly class ParserStateMachine {
 			]],
 			308 => ['name' => 'method call value', 'transitions' => [
 				T::call_end->name => function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
-						$this->s->result['expression_left'],
-						$this->s->result['method_name'],
-						$this->s->generated
-					);
+					$this->noErrorMethodCall(true);
 					$this->s->move(315);
 				}
 			]],
@@ -844,22 +842,15 @@ final readonly class ParserStateMachine {
 			]],
 			310 => ['name' => 'method call value tuple or record', 'transitions' => [
 				T::property_accessor->name => $c = function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
-						$this->s->result['expression_left'],
-						$this->s->result['method_name'],
-						$this->s->generated
-					);
+					$this->noErrorMethodCall(true);
 					$this->s->stay(302);
 				},
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				T::call_start->name => $c,
 				T::tuple_start->name => $c,
 				'' => function(LT $token) {
-					$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
-						$this->s->result['expression_left'],
-						$this->s->result['method_name'],
-						$this->s->generated
-					);
+					$this->noErrorMethodCall(true);
 					$this->s->pop();
 				}
 			]],
@@ -900,6 +891,7 @@ final readonly class ParserStateMachine {
 					$this->s->stay(302);
 				},
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				T::call_start->name => $c,
 				T::tuple_start->name => $c,
 				'' => function(LT $token) {
@@ -915,6 +907,7 @@ final readonly class ParserStateMachine {
 					$this->s->stay(302);
 				},
 				T::method_marker->name => $c,
+				T::lambda_return->name => $c,
 				T::call_start->name => $c,
 				T::tuple_start->name => $c,
 				'' => function(LT $token) {
@@ -1993,7 +1986,7 @@ final readonly class ParserStateMachine {
 				T::tuple_end->name => 823
 			]],
 			823 => ['name' => 'module level record value return', 'transitions' => [
-				'expression_separator' => function(LT $token) {
+				'' => function(LT $token) {
 					$this->s->generated = $this->programBuilder->typeRegistry()['Record'](
 						$this->s->result['compositeValues'],
 						$this->s->result['restType'] ?? $this->programBuilder->typeRegistry()['Any']()
@@ -2059,7 +2052,7 @@ final readonly class ParserStateMachine {
 				T::tuple_end->name => 833
 			]],
 			833 => ['name' => 'module level tuple value return', 'transitions' => [
-				'expression_separator' => function(LT $token) {
+				'' => function(LT $token) {
 					$this->s->generated = $this->programBuilder->typeRegistry()['Tuple'](
 						$this->s->result['compositeValues'],
 						$this->s->result['restType'] ?? $this->programBuilder->typeRegistry()['Any']()
@@ -2146,5 +2139,17 @@ final readonly class ParserStateMachine {
 			}
 		}
 		return $this->programBuilder->expressionRegistry()['method']($l, $m, $g);
+	}
+
+	private function noErrorMethodCall(bool $useGenerated): void {
+		$this->s->generated = $this->programBuilder->expressionRegistry()['method'](
+			$this->s->result['expression_left'],
+			$this->s->result['method_name'],
+			$useGenerated ? $this->s->generated :
+				$this->programBuilder->expressionRegistry()['constant']($this->programBuilder->valueRegistry()['null']())
+		);
+		if ($this->s->result['is_no_error'] ?? false) {
+			$this->s->generated = $this->programBuilder->expressionRegistry()['noError']($this->s->generated);
+		}
 	}
 }

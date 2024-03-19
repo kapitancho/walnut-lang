@@ -28,13 +28,27 @@ final readonly class Item implements Method {
 		Type|null $dependencyType,
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
-		if ($targetType instanceof RecordType) {
-			$targetType = $targetType->asMapType();
-		}
-		if ($targetType instanceof MapType) {
+		$type = $targetType instanceof RecordType ? $targetType->asMapType() : $targetType;
+		if ($type instanceof MapType) {
 			$parameterType = $this->context->toBaseType($parameterType);
 			if ($parameterType instanceof StringType || $parameterType instanceof StringSubsetType) {
-				$returnType = $targetType->itemType();
+				$returnType = $type->itemType();
+				if ($targetType instanceof RecordType && $parameterType instanceof StringSubsetType) {
+					$returnType = $this->context->typeRegistry->union(
+						array_map(
+							fn(StringValue $value) =>
+								$targetType->types()[$value->literalValue()] ??
+								$targetType->restType(),
+							$parameterType->subsetValues()
+						)
+					);
+					$allKeys = array_filter($parameterType->subsetValues(),
+						fn(StringValue $value) => array_key_exists($value->literalValue(), $targetType->types())
+					);
+					if (count($allKeys) === count($parameterType->subsetValues())) {
+						return $returnType;
+					}
+				}
 				return $this->context->typeRegistry->result(
 					$returnType,
 					$this->context->typeRegistry->state(

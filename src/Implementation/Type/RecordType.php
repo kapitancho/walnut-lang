@@ -35,7 +35,7 @@ final readonly class RecordType implements RecordTypeInterface, JsonSerializable
 	public function asMapType(): MapType {
 		$l = count($this->types());
 		return $this->typeRegistry->map(
-			$this->typeRegistry->union(array_values($this->types())),
+			$this->typeRegistry->union(array_values([... $this->types(), $this->restType])),
 			$l,
 			$l,
 		);

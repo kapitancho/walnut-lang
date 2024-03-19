@@ -10,8 +10,11 @@ use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
+use Walnut\Lang\Blueprint\Type\RealSubsetType;
+use Walnut\Lang\Blueprint\Type\RealType;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\IntegerValue;
+use Walnut\Lang\Blueprint\Value\RealValue;
 use Walnut\Lang\Blueprint\Value\Value;
 
 final readonly class AsReal implements Method {
@@ -26,7 +29,8 @@ final readonly class AsReal implements Method {
 		Type|null $dependencyType,
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
-		if ($targetType instanceof IntegerType || $targetType instanceof IntegerSubsetType) {
+		if ($targetType instanceof IntegerType || $targetType instanceof IntegerSubsetType ||
+			$targetType instanceof RealType || $targetType instanceof RealSubsetType) {
 			return $this->context->typeRegistry->real(
 				$targetType->range()->minValue() === MinusInfinity::value ? MinusInfinity::value :
 					(int)$targetType->range()->minValue(),
@@ -45,7 +49,7 @@ final readonly class AsReal implements Method {
 		Value|null $dependencyValue,
 	): Value {
 		$targetValue = $this->context->toBaseValue($targetValue);
-		if ($targetValue instanceof IntegerValue) {
+		if ($targetValue instanceof IntegerValue || $targetValue instanceof RealValue) {
 			$target = $targetValue->literalValue();
 			return $this->context->valueRegistry->real((float)$target);
 		}
