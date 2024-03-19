@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\PropertyNameIdentifier;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\TupleType as TupleTypeInterface;
 use Walnut\Lang\Blueprint\Type\UnknownProperty;
 
-final readonly class TupleType implements TupleTypeInterface {
+final readonly class TupleType implements TupleTypeInterface, JsonSerializable {
 	/** @param list<Type> $types */
 	public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -102,4 +103,9 @@ final readonly class TupleType implements TupleTypeInterface {
 		}
 		return "[" . implode(', ', $types) . "]";
 	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Tuple', 'types' => $this->types, 'restType' => $this->restType];
+	}
+
 }

@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
@@ -10,7 +11,7 @@ use Walnut\Lang\Blueprint\Type\EnumerationType;
 use Walnut\Lang\Blueprint\Value\EnumerationValue as EnumerationValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class EnumerationValue implements EnumerationValueInterface {
+final readonly class EnumerationValue implements EnumerationValueInterface, JsonSerializable {
 
     public function __construct(
         private TypeRegistry $typeRegistry,
@@ -43,5 +44,13 @@ final readonly class EnumerationValue implements EnumerationValueInterface {
 			$this->typeName,
 			$this->valueIdentifier
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'EnumerationValue',
+			'typeName' => $this->typeName,
+			'valueIdentifier' => $this->valueIdentifier
+		];
 	}
 }

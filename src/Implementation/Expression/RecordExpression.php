@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Expression\RecordExpression as RecordExpressionInterfa
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Registry\ValueRegistry;
 
-final readonly class RecordExpression implements RecordExpressionInterface {
+final readonly class RecordExpression implements RecordExpressionInterface, JsonSerializable {
 
 	/** @param array<string, Expression> $values */
 	public function __construct(
@@ -71,5 +72,12 @@ final readonly class RecordExpression implements RecordExpressionInterface {
 			"[%s]",
 			implode(", ", $values)
 		) : '[:]';
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'Record',
+			'values' => $this->values
+		];
 	}
 }

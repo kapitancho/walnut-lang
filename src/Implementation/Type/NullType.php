@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\NullType as NullTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\NullValue;
 
-final readonly class NullType implements NullTypeInterface {
+final readonly class NullType implements NullTypeInterface, JsonSerializable {
 
     public function __construct(
         private TypeNameIdentifier $typeName,
@@ -31,5 +32,9 @@ final readonly class NullType implements NullTypeInterface {
 
 	public function __toString(): string {
 		return 'Null';
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Null'];
 	}
 }

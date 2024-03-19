@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
@@ -32,7 +33,7 @@ use Walnut\Lang\Implementation\Execution\VariableValueScope;
 use Walnut\Lang\Implementation\Type\SubtypeType;
 use Walnut\Lang\Implementation\Value\TypeValue;
 
-final readonly class ConstructorCallExpression implements ConstructorCallExpressionInterface {
+final readonly class ConstructorCallExpression implements ConstructorCallExpressionInterface, JsonSerializable {
 	use BaseTypeHelper;
 
 	public function __construct(
@@ -367,5 +368,13 @@ final readonly class ConstructorCallExpression implements ConstructorCallExpress
 			$this->typeName,
 			$parameter
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'constructorCall',
+			'typeName' => $this->typeName,
+			'parameter' => $this->parameter
+		];
 	}
 }

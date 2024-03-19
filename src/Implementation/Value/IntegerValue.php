@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Value\IntegerValue as IntegerValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Type\IntegerSubsetType;
 
-final readonly class IntegerValue implements IntegerValueInterface {
+final readonly class IntegerValue implements IntegerValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -35,4 +36,10 @@ final readonly class IntegerValue implements IntegerValueInterface {
 		return (string)$this->literalValue();
 	}
 
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Integer',
+			'value' => $this->integerValue
+		];
+	}
 }

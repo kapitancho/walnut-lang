@@ -3,6 +3,7 @@
 namespace Walnut\Lang\Implementation\Type;
 
 use InvalidArgumentException;
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\EnumerationSubsetType as EnumerationSubsetTypeInterface;
@@ -10,7 +11,7 @@ use Walnut\Lang\Blueprint\Type\EnumerationType as EnumerationTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\EnumerationValue;
 
-final readonly class EnumerationType implements EnumerationTypeInterface {
+final readonly class EnumerationType implements EnumerationTypeInterface, JsonSerializable {
 
     /**
      * @param array<string, EnumerationValue> $enumerationValues
@@ -80,5 +81,9 @@ final readonly class EnumerationType implements EnumerationTypeInterface {
 
 	public function __toString(): string {
 		return (string)$this->typeName;
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Enumeration', 'name' => (string)$this->typeName, 'values' => $this->enumerationValues];
 	}
 }

@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\UnionType as UnionTypeInterface;
 
-final readonly class UnionType implements UnionTypeInterface, SupertypeChecker {
+final readonly class UnionType implements UnionTypeInterface, SupertypeChecker, JsonSerializable {
 	/** @var non-empty-list<Type> $types */
 	private array $types;
 
@@ -42,5 +43,9 @@ final readonly class UnionType implements UnionTypeInterface, SupertypeChecker {
 
 	public function __toString(): string {
 		return sprintf("(%s)", implode('|', $this->types));
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Union', 'types' => $this->types];
 	}
 }

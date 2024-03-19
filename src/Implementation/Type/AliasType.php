@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\AliasType as AliasTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class AliasType implements AliasTypeInterface, SupertypeChecker {
+final readonly class AliasType implements AliasTypeInterface, SupertypeChecker, JsonSerializable {
 
     public function __construct(
 	    private TypeNameIdentifier $typeName,
@@ -45,5 +46,13 @@ final readonly class AliasType implements AliasTypeInterface, SupertypeChecker {
 
 	public function isSupertypeOf(Type $ofType): bool {
 		return $ofType->isSubtypeOf($this->aliasedType);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Alias',
+			'name' => $this->typeName,
+			'aliasedType' => $this->aliasedType
+		];
 	}
 }

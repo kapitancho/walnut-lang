@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\LengthRange;
 use Walnut\Lang\Blueprint\Type\MapType as MapTypeInterface;
 use Walnut\Lang\Blueprint\Type\ProxyNamedType;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class MapType implements MapTypeInterface {
+final readonly class MapType implements MapTypeInterface, JsonSerializable {
 
 	private Type $realItemType;
 
@@ -40,5 +41,13 @@ final readonly class MapType implements MapTypeInterface {
 		$itemType = $this->itemType();
 		$type = "Map<$itemType, $this->range>";
 		return str_replace(["<Any, ..>", "<Any, ", ", ..>"], ["", "<", ">"], $type);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Map',
+			'itemType' => $this->itemType,
+			'range' => $this->range
+		];
 	}
 }

@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\StringSubsetType as StringSubsetTypeInterface;
 use Walnut\Lang\Blueprint\Type\StringType as StringTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\StringValue;
 use Walnut\Lang\Implementation\Range\LengthRange;
 
-final readonly class StringSubsetType implements StringSubsetTypeInterface {
+final readonly class StringSubsetType implements StringSubsetTypeInterface, JsonSerializable {
 	private LengthRange $range;
 
 	/** @param list<StringValue> $subsetValues */
@@ -79,4 +80,7 @@ final readonly class StringSubsetType implements StringSubsetTypeInterface {
 		);
 	}
 
+	public function jsonSerialize(): array {
+		return ['type' => 'StringSubset', 'values' => $this->subsetValues];
+	}
 }

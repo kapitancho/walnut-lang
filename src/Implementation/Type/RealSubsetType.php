@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\RealSubsetType as RealSubsetTypeInterface;
 use Walnut\Lang\Blueprint\Type\RealType as RealTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\RealValue;
 use Walnut\Lang\Implementation\Range\RealRange;
 
-final readonly class RealSubsetType implements RealSubsetTypeInterface {
+final readonly class RealSubsetType implements RealSubsetTypeInterface, JsonSerializable {
 
 	private RealRange $range;
 
@@ -79,5 +80,10 @@ final readonly class RealSubsetType implements RealSubsetTypeInterface {
 		return $this->range ??= new RealRange(
 			$this->minValue(), $this->maxValue()
 		);
+	}
+
+
+	public function jsonSerialize(): array {
+		return ['type' => 'RealSubset', 'values' => $this->subsetValues];
 	}
 }

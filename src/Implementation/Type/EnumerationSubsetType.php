@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\EnumerationSubsetType as EnumerationSubsetTypeInterface;
 use Walnut\Lang\Blueprint\Type\EnumerationType as EnumerationTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\EnumerationValue;
 
-final readonly class EnumerationSubsetType implements EnumerationSubsetTypeInterface {
+final readonly class EnumerationSubsetType implements EnumerationSubsetTypeInterface, JsonSerializable {
 
     /**
      * @param array<string, EnumerationValue> $subsetValues
@@ -55,5 +56,13 @@ final readonly class EnumerationSubsetType implements EnumerationSubsetTypeInter
 				$this->subsetValues
 			))
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'EnumerationSubsetType',
+			'enumerationName' => $this->enumeration->name(),
+			'subsetValues' => $this->subsetValues
+		];
 	}
 }

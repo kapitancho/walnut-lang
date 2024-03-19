@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\ProxyNamedType as ProxyNamedTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class ProxyNamedType implements ProxyNamedTypeInterface, SupertypeChecker {
+final readonly class ProxyNamedType implements ProxyNamedTypeInterface, SupertypeChecker, JsonSerializable {
 
     public function __construct(
 	    private TypeNameIdentifier $typeName,
@@ -33,6 +34,14 @@ final readonly class ProxyNamedType implements ProxyNamedTypeInterface, Supertyp
 	public function __toString(): string {
 		return (string)$this->getActualType();
 	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Proxy',
+			'proxy' => (string)$this->getActualType()
+		];
+	}
+
 
 	public function isSupertypeOf(Type $ofType): bool {
 		//$t = $this->getActualType();

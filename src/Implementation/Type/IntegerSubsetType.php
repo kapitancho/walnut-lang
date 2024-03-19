@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\RealRange;
 use Walnut\Lang\Blueprint\Type\IntegerType as IntegerTypeInterface;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType as IntegerSubsetTypeInterface;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Value\IntegerValue;
 use Walnut\Lang\Blueprint\Value\RealValue;
 use Walnut\Lang\Implementation\Range\IntegerRange;
 
-final readonly class IntegerSubsetType implements IntegerSubsetTypeInterface {
+final readonly class IntegerSubsetType implements IntegerSubsetTypeInterface, JsonSerializable {
 
 	private IntegerRange $range;
 
@@ -99,5 +100,12 @@ final readonly class IntegerSubsetType implements IntegerSubsetTypeInterface {
 		return $this->range ??= new IntegerRange(
 			$this->minValue(), $this->maxValue()
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'IntegerSubset',
+			'values' => $this->subsetValues
+		];
 	}
 }

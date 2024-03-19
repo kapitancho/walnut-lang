@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\ReturnResult;
@@ -14,7 +15,7 @@ use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\ResultType;
 use Walnut\Lang\Blueprint\Value\ErrorValue;
 
-final readonly class NoErrorExpression implements NoErrorExpressionInterface {
+final readonly class NoErrorExpression implements NoErrorExpressionInterface, JsonSerializable {
 	public function __construct(
 		private TypeRegistry $typeRegistry,
 		private Expression $targetExpression
@@ -58,5 +59,12 @@ final readonly class NoErrorExpression implements NoErrorExpressionInterface {
 			"?noError(%s)",
 			$this->targetExpression
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'noError',
+			'targetExpression' => $this->targetExpression
+		];
 	}
 }

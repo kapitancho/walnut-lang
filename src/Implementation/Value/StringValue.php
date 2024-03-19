@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Value\StringValue as StringValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Type\StringSubsetType;
 
-final readonly class StringValue implements StringValueInterface {
+final readonly class StringValue implements StringValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -28,5 +29,12 @@ final readonly class StringValue implements StringValueInterface {
 
 	public function __toString(): string {
 		return "'" . str_replace(['\\', "\n", "'"], ['\\\\', '\n', '\`'], $this->literalValue()) . "'";
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'String',
+			'value' => $this->stringValue
+		];
 	}
 }

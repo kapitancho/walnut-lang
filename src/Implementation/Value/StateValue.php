@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\StateType;
 use Walnut\Lang\Blueprint\Value\StateValue as StateValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class StateValue implements StateValueInterface {
+final readonly class StateValue implements StateValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -37,5 +38,13 @@ final readonly class StateValue implements StateValueInterface {
 			$this->typeName,
 			$sv
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'State',
+			'typeName' => $this->typeName,
+			'stateValue' => $this->stateValue
+		];
 	}
 }

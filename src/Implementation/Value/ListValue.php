@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\PropertyNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\TupleType;
@@ -10,7 +11,7 @@ use Walnut\Lang\Blueprint\Type\UnknownProperty;
 use Walnut\Lang\Blueprint\Value\ListValue as ListValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class ListValue implements ListValueInterface {
+final readonly class ListValue implements ListValueInterface, JsonSerializable {
 
 	private TupleType $type;
 
@@ -67,5 +68,12 @@ final readonly class ListValue implements ListValueInterface {
 				static fn(Value $value): string => (string)$value, $this->values
 			))
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'List',
+			'value' => $this->values
+		];
 	}
 }

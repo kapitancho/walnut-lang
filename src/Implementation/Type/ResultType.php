@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\ResultType as ResultTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class ResultType implements ResultTypeInterface, SupertypeChecker {
+final readonly class ResultType implements ResultTypeInterface, SupertypeChecker, JsonSerializable {
 
 	private Type $realReturnType;
 	private Type $realErrorType;
@@ -45,5 +46,9 @@ final readonly class ResultType implements ResultTypeInterface, SupertypeChecker
 			$this->returnType(),
             $this->errorType()
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Result', 'returnType' => $this->returnType(), 'errorType' => $this->errorType()];
 	}
 }

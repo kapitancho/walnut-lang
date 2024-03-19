@@ -8,7 +8,6 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
-use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;

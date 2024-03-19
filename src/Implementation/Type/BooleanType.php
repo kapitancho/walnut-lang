@@ -3,6 +3,7 @@
 namespace Walnut\Lang\Implementation\Type;
 
 use InvalidArgumentException;
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\BooleanType as BooleanTypeInterface;
@@ -10,7 +11,7 @@ use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\BooleanValue;
 use Walnut\Lang\Blueprint\Value\EnumerationValue;
 
-final readonly class BooleanType implements BooleanTypeInterface {
+final readonly class BooleanType implements BooleanTypeInterface, JsonSerializable {
 
 	/** @var list<BooleanValue> $enumerationValues */
 	private array $enumerationValues;
@@ -93,5 +94,9 @@ final readonly class BooleanType implements BooleanTypeInterface {
 
 	public function __toString(): string {
 		return 'Boolean';
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Boolean'];
 	}
 }

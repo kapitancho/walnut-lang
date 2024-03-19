@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Range;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\IntegerRange as IntegerRangeInterface;
 use Walnut\Lang\Blueprint\Range\InvalidIntegerRange;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Value\IntegerValue;
 
-final readonly class IntegerRange implements IntegerRangeInterface {
+final readonly class IntegerRange implements IntegerRangeInterface, JsonSerializable {
 	public function __construct(
 		public int|MinusInfinity $minValue,
 		public int|PlusInfinity  $maxValue
@@ -100,5 +101,12 @@ final readonly class IntegerRange implements IntegerRangeInterface {
 		return
 			($this->minValue === MinusInfinity::value ? '' : $this->minValue) . '..' .
 			($this->maxValue === PlusInfinity::value ? '' : $this->maxValue);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'minValue' => $this->minValue instanceof MinusInfinity ? '-Infinity' : $this->minValue,
+			'maxValue' => $this->maxValue instanceof PlusInfinity ? '+Infinity' : $this->maxValue
+		];
 	}
 }

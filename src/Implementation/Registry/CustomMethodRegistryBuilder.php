@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Registry;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Function\CustomMethod as CustomMethodInterface;
 use Walnut\Lang\Blueprint\Function\FunctionBody;
@@ -15,7 +16,7 @@ use Walnut\Lang\Blueprint\Registry\UnresolvableDependency;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Implementation\Function\CustomMethod;
 
-final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodRegistryBuilderInterface {
+final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodRegistryBuilderInterface, JsonSerializable {
 
 	/**
 	 * @var array<string, list<CustomMethodInterface>> $methods
@@ -109,5 +110,9 @@ final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodR
 				}
 			}
 		}
+	}
+
+	public function jsonSerialize(): array {
+		return $this->methods;
 	}
 }

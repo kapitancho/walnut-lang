@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\MutableValue as MutableValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Registry\TypeRegistry;
 use Walnut\Lang\Implementation\Type\MutableType;
 
-final class MutableValue implements MutableValueInterface {
+final class MutableValue implements MutableValueInterface, JsonSerializable {
 
     public function __construct(
 		private readonly TypeRegistry $typeRegistry,
@@ -45,5 +46,13 @@ final class MutableValue implements MutableValueInterface {
 			$this->targetType,
 			$this->value
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Mutable',
+			'targetType' => $this->targetType,
+			'value' => $this->value
+		];
 	}
 }

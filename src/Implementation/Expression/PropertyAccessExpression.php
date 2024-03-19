@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
@@ -29,7 +30,7 @@ use Walnut\Lang\Blueprint\Value\StateValue;
 use Walnut\Lang\Implementation\Type\MapType;
 use Walnut\Lang\Implementation\Type\UnionType;
 
-final readonly class PropertyAccessExpression implements PropertyAccessExpressionInterface {
+final readonly class PropertyAccessExpression implements PropertyAccessExpressionInterface, JsonSerializable {
 	use BaseTypeHelper;
 
 	public function __construct(
@@ -220,5 +221,13 @@ final readonly class PropertyAccessExpression implements PropertyAccessExpressio
 			$this->target,
 			$this->propertyName
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'propertyAccess',
+			'target' => $this->target,
+			'propertyName' => $this->propertyName
+		];
 	}
 }

@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Function\FunctionBody;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\SubtypeType as SubtypeTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class SubtypeType implements SubtypeTypeInterface {
+final readonly class SubtypeType implements SubtypeTypeInterface, JsonSerializable {
 
     public function __construct(
 	    private TypeNameIdentifier $typeName,
@@ -47,4 +48,9 @@ final readonly class SubtypeType implements SubtypeTypeInterface {
 	public function __toString(): string {
 		return (string)$this->typeName;
 	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Subtype', 'name' => $this->typeName, 'baseType' => $this->baseType];
+	}
+
 }

@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Value\FunctionValue;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class ConstantExpression implements ConstantExpressionInterface {
+final readonly class ConstantExpression implements ConstantExpressionInterface, JsonSerializable {
 	public function __construct(
 		private TypeRegistry $typeRegistry,
 		private Value $value
@@ -43,5 +44,12 @@ final readonly class ConstantExpression implements ConstantExpressionInterface {
 
 	public function __toString(): string {
 		return (string)$this->value;
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'constant',
+			'value' => $this->value
+		];
 	}
 }

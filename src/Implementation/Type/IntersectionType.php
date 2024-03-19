@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\IntersectionType as IntersectionTypeInterface;
 
-final readonly class IntersectionType implements IntersectionTypeInterface, SupertypeChecker {
+final readonly class IntersectionType implements IntersectionTypeInterface, SupertypeChecker, JsonSerializable {
 	/** @var non-empty-list<Type> $types */
 	private array $types;
 
@@ -42,5 +43,9 @@ final readonly class IntersectionType implements IntersectionTypeInterface, Supe
 
 	public function __toString(): string {
 		return sprintf("(%s)", implode('&', $this->types));
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Intersection', 'types' => $this->types];
 	}
 }

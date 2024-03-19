@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\SubtypeType;
 use Walnut\Lang\Blueprint\Value\SubtypeValue as SubtypeValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Registry\TypeRegistry;
 
-final readonly class SubtypeValue implements SubtypeValueInterface {
+final readonly class SubtypeValue implements SubtypeValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -37,5 +38,13 @@ final readonly class SubtypeValue implements SubtypeValueInterface {
 			$this->typeName,
 			$bv
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Subtype',
+			'typeName' => $this->typeName,
+			'baseValue' => $this->baseValue
+		];
 	}
 }

@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Registry;
 
+use JsonSerializable;
 use LogicException;
 use Walnut\Lang\Blueprint\Execution\Program;
 use Walnut\Lang\Blueprint\Execution\VariableValuePair;
@@ -83,7 +84,7 @@ use Walnut\Lang\Implementation\Expression\MatchExpressionEquals;
 use Walnut\Lang\Implementation\Expression\MatchExpressionIsSubtypeOf;
 use Walnut\Lang\Implementation\Function\FunctionBody;
 
-final readonly class ProgramBuilder implements ProgramBuilderInterface, Program {
+final readonly class ProgramBuilder implements ProgramBuilderInterface, Program, JsonSerializable {
 
 	public function __construct(
 		private TypeRegistryBuilder $typeRegistryBuilder,
@@ -493,4 +494,11 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program 
 		throw new LogicException("Invalid main function");
 	}*/
 
+	public function jsonSerialize(): array {
+		return [
+			'types' => $this->typeRegistry,
+			'values' => $this->valueRegistry,
+			'methods' => $this->customMethodRegistryBuilder
+		];
+	}
 }

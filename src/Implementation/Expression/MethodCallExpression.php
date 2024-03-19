@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
@@ -21,7 +22,7 @@ use Walnut\Lang\Blueprint\Type\StateType;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Value\ErrorValue;
 
-final readonly class MethodCallExpression implements MethodCallExpressionInterface {
+final readonly class MethodCallExpression implements MethodCallExpressionInterface, JsonSerializable {
 	public function __construct(
 		private TypeRegistry $typeRegistry,
 		private MethodRegistry $methodRegistry,
@@ -139,5 +140,14 @@ final readonly class MethodCallExpression implements MethodCallExpressionInterfa
 			$this->methodName,
 			$parameter === '(null)' ? '' : $parameter
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'methodCall',
+			'target' => $this->target,
+			'methodName' => $this->methodName,
+			'parameter' => $this->parameter
+		];
 	}
 }

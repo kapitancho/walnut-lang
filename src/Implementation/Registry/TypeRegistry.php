@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Registry;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\VariablePair;
 use Walnut\Lang\Blueprint\Function\FunctionBody;
@@ -59,7 +60,7 @@ use Walnut\Lang\Implementation\Value\BooleanValue;
 use Walnut\Lang\Implementation\Value\EnumerationValue;
 use Walnut\Lang\Implementation\Value\NullValue;
 
-final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder {
+final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder, JsonSerializable {
 
     private AnyType $anyType;
     private NothingType $nothingType;
@@ -86,7 +87,6 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder {
 
     private const booleanTypeName = 'Boolean';
     private const nullTypeName = 'Null';
-    private const otherTypes = [];//['NotANumber', 'MinusInfinity', 'PlusInfinity', 'DependencyContainer', 'Constructor'];
 
     public function __construct() {
         $this->unionTypeNormalizer = new UnionTypeNormalizer($this);
@@ -100,12 +100,6 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder {
 	            new NullValue($this)
 	        )
         ];
-        foreach(self::otherTypes as $typeName) {
-            $atomTypes[$typeName] = new AtomType(
-                $n = new TypeNameIdentifier($typeName),
-                new AtomValue($this, $n)
-            );
-        }
 
         $this->atomTypes = $atomTypes;
         $enumerationTypes = [
@@ -372,4 +366,34 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder {
 		}
 	}
 
+	public function jsonSerialize(): array {
+		return [
+			'coreTypes' => [
+				'Any' => $this->anyType,
+				'Nothing' => $this->nothingType,
+				'Boolean' => $this->booleanType,
+				'True' => $this->trueType,
+				'False' => $this->falseType,
+				'Null' => $this->nullType,
+				'Integer' => $this->integer(),
+				'Real' => $this->real(),
+				'String' => $this->string(),
+				'Array' => $this->array(),
+				'Map' => $this->map(),
+				'Tuple' => $this->tuple([], $this->nothingType),
+				'Record' => $this->record([], $this->nothingType),
+				'Mutable' => $this->mutable($this->anyType),
+				'Result' => $this->result($this->anyType, $this->anyType),
+				'Type' => $this->type($this->anyType),
+				'Function' => $this->function($this->anyType, $this->anyType),
+				'Intersection' => $this->intersection([$this->integer(), $this->string()]),
+				'Union' => $this->union([$this->integer(), $this->string()]),
+			],
+			'atomTypes' => $this->atomTypes,
+			'enumerationTypes' => $this->enumerationTypes,
+			'aliasTypes' => $this->aliasTypes,
+			'subtypeTypes' => $this->subtypeTypes,
+			'stateTypes' => $this->stateTypes
+		];
+	}
 }

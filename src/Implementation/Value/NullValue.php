@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\AtomType;
 use Walnut\Lang\Blueprint\Value\NullValue as NullValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class NullValue implements NullValueInterface {
+final readonly class NullValue implements NullValueInterface, JsonSerializable {
 
     public function __construct(
         private TypeRegistry $typeRegistry
@@ -28,4 +29,11 @@ final readonly class NullValue implements NullValueInterface {
 	public function __toString(): string {
 		return 'null';
 	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Null'
+		];
+	}
+
 }

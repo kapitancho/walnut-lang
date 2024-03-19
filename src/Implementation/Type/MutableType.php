@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\MutableType as MutableTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class MutableType implements MutableTypeInterface {
+final readonly class MutableType implements MutableTypeInterface, JsonSerializable {
 
 	private Type $realValueType;
 
@@ -31,5 +32,9 @@ final readonly class MutableType implements MutableTypeInterface {
 
 	public function __toString(): string {
 		return sprintf("Mutable<%s>", $this->valueType());
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Mutable', 'valueType' => $this->valueType];
 	}
 }

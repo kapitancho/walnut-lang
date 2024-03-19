@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ReturnResult;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
 use Walnut\Lang\Blueprint\Execution\VariablePair;
@@ -19,7 +20,7 @@ use Walnut\Lang\Implementation\Execution\VariableValueScope;
 use Walnut\Lang\Implementation\Registry\TypeRegistry;
 use Walnut\Lang\Implementation\Type\FunctionType;
 
-final readonly class FunctionValue implements FunctionValueInterface {
+final readonly class FunctionValue implements FunctionValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -150,5 +151,14 @@ final readonly class FunctionValue implements FunctionValueInterface {
 			$this->returnType,
 			$this->body
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Function',
+			'parameterType' => $this->parameterType,
+			'returnType' => $this->returnType,
+			'body' => $this->body
+		];
 	}
 }

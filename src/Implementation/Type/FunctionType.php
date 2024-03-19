@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\FunctionType as FunctionTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class FunctionType implements FunctionTypeInterface {
+final readonly class FunctionType implements FunctionTypeInterface, JsonSerializable {
 
 	private Type $realParameterType;
 	private Type $realReturnType;
@@ -42,5 +43,13 @@ final readonly class FunctionType implements FunctionTypeInterface {
 			$this->parameterType(),
 			$this->returnType(),
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Function',
+			'parameter' => $this->parameterType(),
+			'return' => $this->returnType()
+		];
 	}
 }

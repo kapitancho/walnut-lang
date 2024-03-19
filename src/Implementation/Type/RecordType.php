@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\PropertyNameIdentifier;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Type\MapType;
 use Walnut\Lang\Blueprint\Type\RecordType as RecordTypeInterface;
 use Walnut\Lang\Blueprint\Type\UnknownProperty;
 
-final readonly class RecordType implements RecordTypeInterface {
+final readonly class RecordType implements RecordTypeInterface, JsonSerializable {
 	/** @param array<string, Type> $types */
 	public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -116,5 +117,10 @@ final readonly class RecordType implements RecordTypeInterface {
 			}
 		}
 		return sprintf("[%s%s]", $typeX, implode(', ', $types));
+	}
+
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Record', 'types' => $this->types, 'restType' => $this->restType];
 	}
 }

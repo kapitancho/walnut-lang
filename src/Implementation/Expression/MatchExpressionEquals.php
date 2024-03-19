@@ -2,10 +2,11 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Expression\MatchExpressionOperation;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class MatchExpressionEquals implements MatchExpressionOperation {
+final readonly class MatchExpressionEquals implements MatchExpressionOperation, JsonSerializable {
 
 	public function match(Value $matchValue, Value $matchAgainst): bool {
 		return $matchValue->equals($matchAgainst);
@@ -13,5 +14,9 @@ final readonly class MatchExpressionEquals implements MatchExpressionOperation {
 
 	public function __toString(): string {
 		return "==";
+	}
+
+	public function jsonSerialize(): string {
+		return 'equals';
 	}
 }

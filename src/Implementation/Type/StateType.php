@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\StateType as StateTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class StateType implements StateTypeInterface {
+final readonly class StateType implements StateTypeInterface, JsonSerializable {
 
     public function __construct(
 	    private TypeNameIdentifier $typeName,
@@ -33,5 +34,9 @@ final readonly class StateType implements StateTypeInterface {
 
 	public function __toString(): string {
 		return (string)$this->typeName;
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'State', 'name' => $this->typeName, 'stateType' => $this->stateType];
 	}
 }

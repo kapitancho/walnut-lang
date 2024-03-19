@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Registry;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
 use Walnut\Lang\Blueprint\Execution\VariableValuePair;
@@ -34,7 +35,7 @@ use Walnut\Lang\Implementation\Value\StringValue;
 use Walnut\Lang\Implementation\Value\SubtypeValue;
 use Walnut\Lang\Implementation\Value\TypeValue;
 
-final class ValueRegistry implements ValueRegistryInterface, ValueRegistryBuilder {
+final class ValueRegistry implements ValueRegistryInterface, ValueRegistryBuilder, JsonSerializable {
 	/** @var array<string, VariableValuePair> */
 	private array $pairs;
 	public function __construct(private readonly TypeRegistry $typeRegistry) {
@@ -186,5 +187,11 @@ final class ValueRegistry implements ValueRegistryInterface, ValueRegistryBuilde
 
 	public function build(): ValueRegistryInterface {
 		return $this;
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'globalValues' => $this->pairs
+		];
 	}
 }

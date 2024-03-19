@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\Type\AtomType as AtomTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\AtomValue;
 
-final readonly class AtomType implements AtomTypeInterface {
+final readonly class AtomType implements AtomTypeInterface, JsonSerializable {
 
     public function __construct(
         private TypeNameIdentifier $typeName,
@@ -34,5 +35,12 @@ final readonly class AtomType implements AtomTypeInterface {
 
 	public function __toString(): string {
 		return (string)$this->typeName;
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Atom',
+			'name' => $this->typeName
+		];
 	}
 }

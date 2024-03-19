@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\PropertyNameIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\RecordType;
@@ -10,7 +11,7 @@ use Walnut\Lang\Blueprint\Type\UnknownProperty;
 use Walnut\Lang\Blueprint\Value\DictValue as DictValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class DictValue implements DictValueInterface {
+final readonly class DictValue implements DictValueInterface, JsonSerializable {
 
 	private RecordType $type;
 
@@ -73,4 +74,12 @@ final readonly class DictValue implements DictValueInterface {
 			))
 		) : '[:]';
 	}
+
+		public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Dict',
+			'values' => $this->values
+		];
+	}
+
 }

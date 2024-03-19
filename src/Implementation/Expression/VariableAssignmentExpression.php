@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
@@ -18,7 +19,7 @@ use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Value\FunctionBodyException;
 use Walnut\Lang\Blueprint\Value\FunctionValue;
 
-final readonly class VariableAssignmentExpression implements VariableAssignmentExpressionInterface {
+final readonly class VariableAssignmentExpression implements VariableAssignmentExpressionInterface, JsonSerializable {
 	public function __construct(
 		private TypeRegistry $typeRegistry,
 		private VariableNameIdentifier $variableName,
@@ -92,5 +93,13 @@ final readonly class VariableAssignmentExpression implements VariableAssignmentE
 			$this->variableName,
 			$this->assignedExpression
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'variableAssignment',
+			'variableName' => $this->variableName,
+			'assignedExpression' => $this->assignedExpression
+		];
 	}
 }

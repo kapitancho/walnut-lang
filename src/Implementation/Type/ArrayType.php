@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\LengthRange;
 use Walnut\Lang\Blueprint\Type\ArrayType as ArrayTypeInterface;
 use Walnut\Lang\Blueprint\Type\ProxyNamedType;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class ArrayType implements ArrayTypeInterface {
+final readonly class ArrayType implements ArrayTypeInterface, JsonSerializable {
 
 	private Type $realItemType;
 
@@ -40,5 +41,13 @@ final readonly class ArrayType implements ArrayTypeInterface {
 		$itemType = $this->itemType();
 		$type = "Array<$itemType, $this->range>";
 		return str_replace(["<Any, ..>", "<Any, ", ", ..>"], ["", "<", ">"], $type);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Array',
+			'itemType' => $this->itemType,
+			'range' => $this->range
+		];
 	}
 }

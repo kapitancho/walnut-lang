@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Expression\TupleExpression as TupleExpressionInterface
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Registry\ValueRegistry;
 
-final readonly class TupleExpression implements TupleExpressionInterface {
+final readonly class TupleExpression implements TupleExpressionInterface, JsonSerializable {
 
 	/** @param list<Expression> $values */
 	public function __construct(
@@ -67,5 +68,12 @@ final readonly class TupleExpression implements TupleExpressionInterface {
 			"[%s]",
 			implode(", ", $this->values)
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'Tuple',
+			'values' => $this->values
+		];
 	}
 }

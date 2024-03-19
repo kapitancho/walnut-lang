@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\TrueType as TrueTypeInterface;
 use Walnut\Lang\Blueprint\Type\BooleanType as BooleanTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\BooleanValue;
 use Walnut\Lang\Blueprint\Value\EnumerationValue;
 
-final readonly class TrueType implements TrueTypeInterface {
+final readonly class TrueType implements TrueTypeInterface, JsonSerializable {
 	/** @var list<BooleanValue> $subsetValues */
 	private array $subsetValues;
 
@@ -43,4 +44,9 @@ final readonly class TrueType implements TrueTypeInterface {
 	public function __toString(): string {
 		return 'True';
 	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'True'];
+	}
+
 }

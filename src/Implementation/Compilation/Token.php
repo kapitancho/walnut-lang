@@ -24,6 +24,8 @@ enum Token: string {
 	case call_end = '\)';
 	case sequence_start = '\{';
 	case sequence_end = '\}';
+	case less_than_equal = '\<\=';
+	case greater_than_equal = '\>\=';
 	case type_start = '\<';
 	case type_end = '\>';
 	case empty_tuple = '\[\]';

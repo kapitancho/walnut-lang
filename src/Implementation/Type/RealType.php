@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\RealRange;
 use Walnut\Lang\Blueprint\Type\RealType as RealTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class RealType implements RealTypeInterface {
+final readonly class RealType implements RealTypeInterface, JsonSerializable {
 
     public function __construct(private RealRange $range) {}
 
@@ -27,5 +28,9 @@ final readonly class RealType implements RealTypeInterface {
 	public function __toString(): string {
 		$range = (string)$this->range;
 		return sprintf("Real%s", $range === '..' ? '' : "<$range>");
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Real', 'range' => $this->range];
 	}
 }

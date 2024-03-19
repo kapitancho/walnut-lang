@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\FalseType as FalseTypeInterface;
 use Walnut\Lang\Blueprint\Type\BooleanType as BooleanTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\BooleanValue;
 use Walnut\Lang\Blueprint\Value\EnumerationValue;
 
-final readonly class FalseType implements FalseTypeInterface {
+final readonly class FalseType implements FalseTypeInterface, JsonSerializable {
 	/** @var list<BooleanValue> $subsetValues */
 	private array $subsetValues;
 
@@ -42,5 +43,9 @@ final readonly class FalseType implements FalseTypeInterface {
 
 	public function __toString(): string {
 		return 'False';
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'False'];
 	}
 }

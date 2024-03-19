@@ -2,12 +2,13 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Expression\MatchExpressionOperation;
 use Walnut\Lang\Blueprint\Value\SubtypeValue;
 use Walnut\Lang\Blueprint\Value\TypeValue;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class MatchExpressionIsSubtypeOf implements MatchExpressionOperation {
+final readonly class MatchExpressionIsSubtypeOf implements MatchExpressionOperation, JsonSerializable {
 
 	public function match(Value $matchValue, Value $matchAgainst): bool {
 		return
@@ -19,5 +20,9 @@ final readonly class MatchExpressionIsSubtypeOf implements MatchExpressionOperat
 
 	public function __toString(): string {
 		return "<:";
+	}
+
+	public function jsonSerialize(): string {
+		return 'isSubtypeOf';
 	}
 }

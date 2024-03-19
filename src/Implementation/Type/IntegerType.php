@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\IntegerRange;
 use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
@@ -12,7 +13,7 @@ use Walnut\Lang\Blueprint\Type\RealType as RealTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\IntegerValue;
 
-final readonly class IntegerType implements IntegerTypeInterface {
+final readonly class IntegerType implements IntegerTypeInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -55,5 +56,12 @@ final readonly class IntegerType implements IntegerTypeInterface {
 				array_filter($ofType->subsetValues(), fn(IntegerValue $value): bool =>
 					$value->literalValue() >= $min && $value->literalValue() <= $max
 			));
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'type' => 'Integer',
+			'range' => $this->range
+		];
 	}
 }

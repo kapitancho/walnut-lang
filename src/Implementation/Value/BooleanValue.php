@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Identifier\EnumValueIdentifier;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\BooleanType;
@@ -9,7 +10,7 @@ use Walnut\Lang\Blueprint\Type\EnumerationSubsetType;
 use Walnut\Lang\Blueprint\Value\BooleanValue as BooleanValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class BooleanValue implements BooleanValueInterface {
+final readonly class BooleanValue implements BooleanValueInterface, JsonSerializable {
 
     public function __construct(
         private TypeRegistry $typeRegistry,
@@ -39,5 +40,12 @@ final readonly class BooleanValue implements BooleanValueInterface {
 
 	public function __toString(): string {
 		return $this->value ? 'true' : 'false';
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Boolean',
+			'value' => $this->value ? 'true' : 'false'
+		];
 	}
 }

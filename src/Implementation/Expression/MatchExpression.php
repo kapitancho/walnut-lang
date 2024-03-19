@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
@@ -19,7 +20,7 @@ use Walnut\Lang\Blueprint\Registry\ValueRegistry;
 use Walnut\Lang\Blueprint\Type\TypeType;
 use Walnut\Lang\Blueprint\Value\TypeValue;
 
-final readonly class MatchExpression implements MatchExpressionInterface {
+final readonly class MatchExpression implements MatchExpressionInterface, JsonSerializable {
 
 	/** @param list<MatchExpressionPair|MatchExpressionDefault> $pairs */
 	public function __construct(
@@ -169,5 +170,14 @@ final readonly class MatchExpression implements MatchExpressionInterface {
 			default =>
 				sprintf("?whenValueOf (%s) %s { %s }", $this->target, $this->operation, $pairs),
 		};
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'Match',
+			'target' => $this->target,
+			'operation' => $this->operation,
+			'pairs' => $this->pairs
+		];
 	}
 }

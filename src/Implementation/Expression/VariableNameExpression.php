@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
 use Walnut\Lang\Blueprint\Execution\UnknownContextVariable;
@@ -13,7 +14,7 @@ use Walnut\Lang\Blueprint\Identifier\VariableNameIdentifier;
 use Walnut\Lang\Implementation\Registry\TypeRegistry;
 use Walnut\Lang\Implementation\Registry\ValueRegistry;
 
-final readonly class VariableNameExpression implements VariableNameExpressionInterface {
+final readonly class VariableNameExpression implements VariableNameExpressionInterface, JsonSerializable {
 	public function __construct(
 		private TypeRegistry $typeRegistry,
 		private ValueRegistry $valueRegistry,
@@ -47,5 +48,12 @@ final readonly class VariableNameExpression implements VariableNameExpressionInt
 
 	public function __toString(): string {
 		return (string)$this->variableName;
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'variableName',
+			'variableName' => $this->variableName
+		];
 	}
 }

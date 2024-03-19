@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Range;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\InvalidLengthRange;
 use Walnut\Lang\Blueprint\Range\LengthRange as LengthRangeInterface;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 
-final readonly class LengthRange implements LengthRangeInterface {
+final readonly class LengthRange implements LengthRangeInterface, JsonSerializable {
 	public function __construct(
 		public int              $minLength,
 		public int|PlusInfinity $maxLength
@@ -50,5 +51,12 @@ final readonly class LengthRange implements LengthRangeInterface {
 	public function __toString(): string {
 		return ($this->minLength === 0 ? '' : $this->minLength) . '..' .
 			($this->maxLength === PlusInfinity::value ? '' : $this->maxLength);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'minLength' => $this->minLength,
+			'maxLength' => $this->maxLength instanceof PlusInfinity ? '+Infinity' : $this->maxLength
+		];
 	}
 }

@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Function;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ReturnResult;
 use Walnut\Lang\Blueprint\Execution\TypedValue;
@@ -26,7 +27,7 @@ use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Execution\VariableScope;
 use Walnut\Lang\Implementation\Execution\VariableValueScope;
 
-final readonly class CustomMethod implements CustomMethodInterface {
+final readonly class CustomMethod implements CustomMethodInterface, JsonSerializable {
 	use BaseTypeHelper;
 
 	public function __construct(
@@ -230,5 +231,16 @@ final readonly class CustomMethod implements CustomMethodInterface {
 			$dependency,
 			$this->functionBody
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'targetType' => (string)$this->targetType,
+			'methodName' => $this->methodName,
+			'parameterType' => $this->parameterType,
+			'dependencyType' => $this->dependencyType,
+			'returnType' => $this->returnType,
+			'functionBody' => $this->functionBody
+		];
 	}
 }

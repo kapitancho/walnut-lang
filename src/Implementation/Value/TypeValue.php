@@ -2,13 +2,14 @@
 
 namespace Walnut\Lang\Implementation\Value;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Registry\TypeRegistry;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\TypeType;
 use Walnut\Lang\Blueprint\Value\TypeValue as TypeValueInterface;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class TypeValue implements TypeValueInterface {
+final readonly class TypeValue implements TypeValueInterface, JsonSerializable {
 
     public function __construct(
 		private TypeRegistry $typeRegistry,
@@ -36,5 +37,12 @@ final readonly class TypeValue implements TypeValueInterface {
 			str_starts_with($val, '[') && str_ends_with($val, ']') ?
 				$val : '{' . $val . '}'
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'valueType' => 'Type',
+			'value' => $this->typeValue
+		];
 	}
 }

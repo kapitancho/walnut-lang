@@ -2,6 +2,7 @@
 
 namespace Walnut\Lang\Implementation\Expression;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Execution\AnalyserException;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultContext;
 use Walnut\Lang\Blueprint\Execution\ExecutionResultValueContext;
@@ -24,7 +25,7 @@ use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Value\FunctionValue;
 use Walnut\Lang\Blueprint\Value\ListValue;
 
-final readonly class FunctionCallExpression implements FunctionCallExpressionInterface {
+final readonly class FunctionCallExpression implements FunctionCallExpressionInterface, JsonSerializable {
 	use BaseTypeHelper;
 
 	public function __construct(
@@ -154,5 +155,13 @@ final readonly class FunctionCallExpression implements FunctionCallExpressionInt
 			$this->target,
 			$parameter
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'expressionType' => 'functionCall',
+			'target' => $this->target,
+			'parameter' => $this->parameter
+		];
 	}
 }

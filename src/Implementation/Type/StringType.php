@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Range\LengthRange;
 use Walnut\Lang\Blueprint\Type\StringType as StringTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class StringType implements StringTypeInterface {
+final readonly class StringType implements StringTypeInterface, JsonSerializable {
 
     public function __construct(private LengthRange $range) {}
 
@@ -27,5 +28,9 @@ final readonly class StringType implements StringTypeInterface {
 	public function __toString(): string {
 		$range = (string)$this->range;
 		return sprintf("String%s", $range === '..' ? '' : "<$range>");
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'String', 'range' => $this->range];
 	}
 }

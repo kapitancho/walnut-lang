@@ -2,11 +2,12 @@
 
 namespace Walnut\Lang\Implementation\Type;
 
+use JsonSerializable;
 use Walnut\Lang\Blueprint\Type\MutableType as MutableTypeInterface;
 use Walnut\Lang\Blueprint\Type\TypeType as TypeTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
 
-final readonly class TypeType implements TypeTypeInterface {
+final readonly class TypeType implements TypeTypeInterface, JsonSerializable {
 
     public function __construct(
         private Type $refType
@@ -37,5 +38,9 @@ final readonly class TypeType implements TypeTypeInterface {
 			"Type<%s>",
 			$this->refType
 		);
+	}
+
+	public function jsonSerialize(): array {
+		return ['type' => 'Type', 'refType' => $this->refType];
 	}
 }
