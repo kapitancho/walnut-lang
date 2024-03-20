@@ -15,6 +15,7 @@ use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\IntersectionType;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\MetaType;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
 use Walnut\Lang\Blueprint\Type\NothingType;
@@ -104,6 +105,19 @@ final readonly class NativeCodeTypeMapper {
 			if ($type instanceof $typeClass) {
 				return array_merge($baseIds, $ids);
 			}
+		}
+		if ($type instanceof MetaType) {
+			return array_merge($baseIds,
+				$this->getTypeMapping()[
+					[
+						'Function' => FunctionType::class,
+						'Tuple' => TupleType::class,
+						'Record' => RecordType::class,
+						'Union' => UnionType::class,
+						'Intersection' => IntersectionType::class
+					][$type->value()->value]
+				]
+			);
 		}
 		// @codeCoverageIgnoreStart
 		return []; //should never reach this point

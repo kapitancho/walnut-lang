@@ -11,6 +11,8 @@ use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Type\ArrayType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\IntegerValue;
@@ -31,6 +33,11 @@ final readonly class Item implements Method {
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
 		$type = $targetType instanceof TupleType ? $targetType->asArrayType() : $targetType;
+		if ($targetType instanceof MetaType && $targetType->value() === MetaTypeValue::Tuple) {
+			$type = $this->context->typeRegistry->array(
+				$this->context->typeRegistry->any()
+			);
+		}
 		if ($type instanceof ArrayType) {
 			if ($parameterType instanceof IntegerType || $parameterType instanceof IntegerSubsetType) {
 				$returnType = $type->itemType();

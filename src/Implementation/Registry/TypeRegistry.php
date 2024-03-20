@@ -16,6 +16,7 @@ use Walnut\Lang\Blueprint\Registry\TypeRegistryBuilder;
 use Walnut\Lang\Blueprint\Type\AliasType as AliasTypeInterface;
 use Walnut\Lang\Blueprint\Type\AtomType as AtomTypeInterface;
 use Walnut\Lang\Blueprint\Type\EnumerationType as EnumerationTypeInterface;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\NamedType as NamedTypeInterface;
 use Walnut\Lang\Blueprint\Type\ResultType as ResultTypeInterface;
 use Walnut\Lang\Blueprint\Type\Type;
@@ -40,6 +41,7 @@ use Walnut\Lang\Implementation\Type\IntegerType;
 use Walnut\Lang\Implementation\Type\IntersectionType;
 use Walnut\Lang\Implementation\Type\ProxyNamedType;
 use Walnut\Lang\Implementation\Type\MapType;
+use Walnut\Lang\Implementation\Type\MetaType;
 use Walnut\Lang\Implementation\Type\MutableType;
 use Walnut\Lang\Implementation\Type\NothingType;
 use Walnut\Lang\Implementation\Type\NullType;
@@ -197,6 +199,10 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder, 
 
 	public function proxyType(TypeNameIdentifier $typeName): ProxyNamedType {
 		return new ProxyNamedType($typeName, $this);
+	}
+
+	public function metaType(MetaTypeValue $value): MetaType {
+		return new MetaType($value, $this);
 	}
 
     public function withName(TypeNameIdentifier $typeName): NamedTypeInterface {

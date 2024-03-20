@@ -3,6 +3,8 @@
 namespace Walnut\Lang\Implementation\Type;
 
 use JsonSerializable;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\UnionType as UnionTypeInterface;
 

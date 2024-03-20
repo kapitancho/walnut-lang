@@ -8,6 +8,8 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Helper\BaseTypeHelper;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Type\FunctionType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\Type as TypeInterface;
 use Walnut\Lang\Blueprint\Type\TypeType;
 use Walnut\Lang\Blueprint\Value\TypeValue;
@@ -30,6 +32,9 @@ final readonly class ParameterType implements Method {
 			$refType = $this->toBaseType($targetType->refType());
 			if ($refType instanceof FunctionType) {
 				return $this->context->typeRegistry->type($refType->parameterType());
+			}
+			if ($refType instanceof MetaType && $refType->value() === MetaTypeValue::Function) {
+				return $this->context->typeRegistry->type($this->context->typeRegistry->any());
 			}
 		}
 		// @codeCoverageIgnoreStart

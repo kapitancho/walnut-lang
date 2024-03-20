@@ -16,6 +16,8 @@ use Walnut\Lang\Blueprint\Type\FunctionType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
 use Walnut\Lang\Blueprint\Type\NothingType;
@@ -93,6 +95,7 @@ interface TypeRegistry {
     public function type(Type $refType): TypeType;
 
     public function proxyType(TypeNameIdentifier $typeName): ProxyNamedType;
+    public function metaType(MetaTypeValue $value): MetaType;
     /** @throws UnknownType */
     public function withName(TypeNameIdentifier $typeName): NamedType;
 	/** @throws UnknownType */

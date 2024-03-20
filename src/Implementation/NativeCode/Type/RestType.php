@@ -7,16 +7,18 @@ use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Helper\BaseTypeHelper;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
-use Walnut\Lang\Blueprint\Type\FunctionType;
+use Walnut\Lang\Blueprint\Type\ArrayType;
+use Walnut\Lang\Blueprint\Type\MapType;
 use Walnut\Lang\Blueprint\Type\MetaType;
 use Walnut\Lang\Blueprint\Type\MetaTypeValue;
+use Walnut\Lang\Blueprint\Type\RecordType;
+use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Type\Type as TypeInterface;
 use Walnut\Lang\Blueprint\Type\TypeType;
 use Walnut\Lang\Blueprint\Value\TypeValue;
 use Walnut\Lang\Blueprint\Value\Value;
-use Walnut\Lang\Implementation\Type\ResultType;
 
-final readonly class ReturnType implements Method {
+final readonly class RestType implements Method {
 
 	use BaseTypeHelper;
 
@@ -31,11 +33,10 @@ final readonly class ReturnType implements Method {
 	): TypeInterface {
 		if ($targetType instanceof TypeType) {
 			$refType = $this->toBaseType($targetType->refType());
-			if ($refType instanceof FunctionType || $refType instanceof ResultType) {
-				return $this->context->typeRegistry->type($refType->returnType());
-			}
-			if ($refType instanceof MetaType && $refType->value() === MetaTypeValue::Function) {
-				return $this->context->typeRegistry->type($this->context->typeRegistry->any());
+			if ($refType instanceof MetaType) {
+				if ($refType->value() === MetaTypeValue::Tuple || $refType->value() === MetaTypeValue::Record) {
+					return $this->context->typeRegistry->type($this->context->typeRegistry->any());
+				}
 			}
 		}
 		// @codeCoverageIgnoreStart
@@ -50,8 +51,8 @@ final readonly class ReturnType implements Method {
 	): Value {
 		if ($targetValue instanceof TypeValue) {
 			$typeValue = $this->toBaseType($targetValue->typeValue());
-			if ($typeValue instanceof FunctionType || $typeValue instanceof ResultType) {
-				return $this->context->valueRegistry->type($typeValue->returnType());
+			if ($typeValue instanceof TupleType || $typeValue instanceof RecordType) {
+				return $this->context->valueRegistry->type($typeValue->restType());
 			}
 		}
 		// @codeCoverageIgnoreStart

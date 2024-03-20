@@ -50,6 +50,8 @@ use Walnut\Lang\Blueprint\Type\FalseType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
 use Walnut\Lang\Blueprint\Type\NothingType;
@@ -221,6 +223,8 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program,
 			'ProxyType' => fn(string $typeName): ProxyNamedType =>
 				$this->typeRegistry->proxyType(new TypeNameIdentifier($typeName)),
 
+			'MetaType' => fn(string $typeName): MetaType =>
+				$this->typeRegistry->metaType(MetaTypeValue::from($typeName)),
 			'TypeByName' => fn(string $typeName): Type =>
 				match($typeName) {
 					'Any' => $this->typeRegistry->any(),

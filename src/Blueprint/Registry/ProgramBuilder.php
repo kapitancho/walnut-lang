@@ -35,6 +35,7 @@ use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\IntersectionType;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\MetaType;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NothingType;
 use Walnut\Lang\Blueprint\Type\NullType;
@@ -122,6 +123,7 @@ interface ProgramBuilder {
 	 *     Function: callable(Type, Type): FunctionType,
 	 *     Union: callable(non-empty-list<Type>): UnionType,
 	 *     Intersection: callable(non-empty-list<Type>): IntersectionType,
+	 *     MetaType: callable(string): MetaType,
 	 *     Type: callable(Type): TypeType,
 	 *     String: callable(int, int): StringType,
 	 *     Integer: callable(int, int): IntegerType,

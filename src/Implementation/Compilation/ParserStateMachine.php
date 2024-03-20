@@ -1357,6 +1357,7 @@ final readonly class ParserStateMachine {
 						'Result' => 780,
 						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
+						'Function', 'Tuple', 'Record', 'Union', 'Intersection' => 707,
 						default => 789
 					};
 					$this->s->i++;
@@ -1374,6 +1375,7 @@ final readonly class ParserStateMachine {
 						'Result' => 780,
 						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
+						'Function', 'Tuple', 'Record', 'Union', 'Intersection' => 707,
 						default => 790
 					};
 					$this->s->i++;
@@ -1407,6 +1409,12 @@ final readonly class ParserStateMachine {
 			702 => ['name' => 'type basic', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->generated = $this->programBuilder->typeRegistry()[$this->s->result['typeName']]();
+					$this->s->pop();
+				},
+			]],
+			707 => ['name' => 'type meta', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->generated = $this->programBuilder->typeRegistry()['MetaType']($this->s->result['typeName']);
 					$this->s->pop();
 				},
 			]],
