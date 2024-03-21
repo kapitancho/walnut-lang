@@ -18,6 +18,7 @@ use Walnut\Lang\Blueprint\Type\UnknownType;
 use Walnut\Lang\Blueprint\Value\AtomValue as AtomValueInterface;
 use Walnut\Lang\Blueprint\Value\EnumerationValue as EnumerationValueInterface;
 use Walnut\Lang\Blueprint\Value\FunctionBodyException;
+use Walnut\Lang\Blueprint\Value\FunctionValue as FunctionValueInterface;
 use Walnut\Lang\Blueprint\Value\UnknownEnumerationValue;
 use Walnut\Lang\Blueprint\Value\Value;
 use Walnut\Lang\Implementation\Execution\VariableValueScope;
@@ -172,7 +173,7 @@ final class ValueRegistry implements ValueRegistryInterface, ValueRegistryBuilde
 	public function analyse(): void {
 		foreach($this->pairs as $pair) {
 			$val = $pair->typedValue->value;
-			if ($val instanceof FunctionValue) {
+			if ($val instanceof FunctionValueInterface) {
 				try {
 					$val->analyse();
 				} catch(FunctionBodyException $e) {

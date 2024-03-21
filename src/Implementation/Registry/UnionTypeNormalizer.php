@@ -25,7 +25,7 @@ final readonly class UnionTypeNormalizer {
         if (count($parsedTypes) === 1) {
             return $parsedTypes[0];
         }
-        return new UnionType(...$parsedTypes);
+        return new UnionType($this, ...$parsedTypes);
     }
 
     private function parseTypes(array $types): array {

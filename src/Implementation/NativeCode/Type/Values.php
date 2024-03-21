@@ -8,6 +8,8 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Type\EnumerationSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\NullType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
 use Walnut\Lang\Blueprint\Type\StringSubsetType;
@@ -31,6 +33,19 @@ final readonly class Values implements Method {
 		if ($parameterType instanceof NullType) {
 			if ($targetType instanceof TypeType) {
 				$refType = $targetType->refType();
+				if ($refType instanceof MetaType) {
+					$t = match($refType->value()) {
+						MetaTypeValue::Enumeration, MetaTypeValue::EnumerationSubset
+							=> $this->context->typeRegistry->any(),
+						MetaTypeValue::IntegerSubset => $this->context->typeRegistry->integer(),
+						MetaTypeValue::RealSubset => $this->context->typeRegistry->real(),
+						MetaTypeValue::StringSubset => $this->context->typeRegistry->string(),
+						default => null
+					};
+					if ($t) {
+						return $this->context->typeRegistry->array($t);
+					}
+				}
 				if ($refType instanceof IntegerSubsetType ||
 					$refType instanceof RealSubsetType ||
 					$refType instanceof StringSubsetType ||

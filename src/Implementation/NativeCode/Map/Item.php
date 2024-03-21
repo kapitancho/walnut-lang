@@ -8,6 +8,8 @@ use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Identifier\TypeNameIdentifier;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\MetaType;
+use Walnut\Lang\Blueprint\Type\MetaTypeValue;
 use Walnut\Lang\Blueprint\Type\RecordType;
 use Walnut\Lang\Blueprint\Type\StringSubsetType;
 use Walnut\Lang\Blueprint\Type\StringType;
@@ -29,6 +31,11 @@ final readonly class Item implements Method {
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
 		$type = $targetType instanceof RecordType ? $targetType->asMapType() : $targetType;
+		if ($targetType instanceof MetaType && $targetType->value() === MetaTypeValue::Record) {
+			$type = $this->context->typeRegistry->map(
+				$this->context->typeRegistry->any()
+			);
+		}
 		if ($type instanceof MapType) {
 			$parameterType = $this->context->toBaseType($parameterType);
 			if ($parameterType instanceof StringType || $parameterType instanceof StringSubsetType) {

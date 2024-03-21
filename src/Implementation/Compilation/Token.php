@@ -36,10 +36,10 @@ enum Token: string {
 	case union = '\|';
 	case intersection = '\&';
 	case assign = '\=';
-	case true = 'true';
-	case false = 'false';
-	case null = 'null';
-	case type = 'type';
+	case true = '\btrue\b';
+	case false = '\bfalse\b';
+	case null = '\bnull\b';
+	case type = '\btype\b';
 	case no_error = '\?noError';
 	case when_type_of = '\?whenTypeOf\b';
 	case when_is_true = '\?whenIsTrue\b';

@@ -7,18 +7,15 @@ use Walnut\Lang\Blueprint\Execution\ExecutionException;
 use Walnut\Lang\Blueprint\Function\Method;
 use Walnut\Lang\Blueprint\Helper\BaseTypeHelper;
 use Walnut\Lang\Blueprint\NativeCode\NativeCodeContext;
-use Walnut\Lang\Blueprint\Type\ArrayType;
-use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\AliasType;
 use Walnut\Lang\Blueprint\Type\MetaType;
 use Walnut\Lang\Blueprint\Type\MetaTypeValue;
-use Walnut\Lang\Blueprint\Type\RecordType;
-use Walnut\Lang\Blueprint\Type\TupleType;
 use Walnut\Lang\Blueprint\Type\Type as TypeInterface;
 use Walnut\Lang\Blueprint\Type\TypeType;
 use Walnut\Lang\Blueprint\Value\TypeValue;
 use Walnut\Lang\Blueprint\Value\Value;
 
-final readonly class RestType implements Method {
+final readonly class AliasedType implements Method {
 
 	use BaseTypeHelper;
 
@@ -32,18 +29,18 @@ final readonly class RestType implements Method {
 		TypeInterface|null $dependencyType,
 	): TypeInterface {
 		if ($targetType instanceof TypeType) {
-			$refType = $this->toBaseType($targetType->refType());
-			if ($refType instanceof TupleType || $refType instanceof RecordType) {
-				return $this->context->typeRegistry->type($refType->restType());
+			$refType = $targetType->refType();
+			if ($refType instanceof AliasType) {
+				return $this->context->typeRegistry->type($refType->aliasedType());
 			}
 			if ($refType instanceof MetaType) {
-				if ($refType->value() === MetaTypeValue::Tuple || $refType->value() === MetaTypeValue::Record) {
+				if ($refType->value() === MetaTypeValue::Alias) {
 					return $this->context->typeRegistry->type($this->context->typeRegistry->any());
 				}
 			}
 		}
 		// @codeCoverageIgnoreStart
-		throw new AnalyserException(sprintf("[%s] Invalid parameter type: %s", __CLASS__, $parameterType));
+		throw new AnalyserException(sprintf("[%s] Invalid target type: %s", __CLASS__, $parameterType));
 		// @codeCoverageIgnoreEnd
 	}
 
@@ -53,9 +50,9 @@ final readonly class RestType implements Method {
 		Value|null $dependencyValue,
 	): Value {
 		if ($targetValue instanceof TypeValue) {
-			$typeValue = $this->toBaseType($targetValue->typeValue());
-			if ($typeValue instanceof TupleType || $typeValue instanceof RecordType) {
-				return $this->context->valueRegistry->type($typeValue->restType());
+			$typeValue = $targetValue->typeValue();
+			if ($typeValue instanceof AliasType) {
+				return $this->context->valueRegistry->type($typeValue->aliasedType());
 			}
 		}
 		// @codeCoverageIgnoreStart

@@ -264,13 +264,13 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder, 
 			return $types[0];
 		}
 		return $normalize ? $this->unionTypeNormalizer->normalize(... $types) :
-			new UnionType(...$types);
+			new UnionType($this->unionTypeNormalizer, ...$types);
 	}
 
 	/** @param list<Type> $types */
 	public function intersection(array $types, bool $normalize = true): Type {
         return $normalize ? $this->intersectionTypeNormalizer->normalize(... $types) :
-            new IntersectionType(...$types);
+            new IntersectionType($this->intersectionTypeNormalizer, ...$types);
 	}
 
 	public function function(Type $parameterType, Type $returnType): FunctionType {

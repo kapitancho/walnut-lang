@@ -1201,6 +1201,17 @@ final readonly class ParserStateMachine {
 			]],
 			481 => ['name' => 'type value type', 'transitions' => [
 				T::type_keyword->name => $c = function(LT $token) {
+					if (in_array($token->patternMatch->text, [
+						'Function', 'Tuple', 'Record', 'Union', 'Intersection', 'Atom', 'Enumeration',
+						'EnumerationSubset', 'IntegerSubset', 'RealSubset', 'StringSubset',
+						'State', 'Subtype', 'Alias', 'Named'
+					], true)) {
+						$this->s->generated = $this->programBuilder->typeRegistry()['MetaType'](
+							$token->patternMatch->text
+						);
+						$this->s->move(482);
+						return;
+					}
 					$this->s->push(482);
 					$this->s->stay(701);
 				},
@@ -1357,7 +1368,6 @@ final readonly class ParserStateMachine {
 						'Result' => 780,
 						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
-						'Function', 'Tuple', 'Record', 'Union', 'Intersection' => 707,
 						default => 789
 					};
 					$this->s->i++;
@@ -1375,7 +1385,6 @@ final readonly class ParserStateMachine {
 						'Result' => 780,
 						'Error' => 775,
 						'Any', 'Nothing', 'Boolean', 'True', 'False', 'Null' => 702,
-						'Function', 'Tuple', 'Record', 'Union', 'Intersection' => 707,
 						default => 790
 					};
 					$this->s->i++;
@@ -1409,12 +1418,6 @@ final readonly class ParserStateMachine {
 			702 => ['name' => 'type basic', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->generated = $this->programBuilder->typeRegistry()[$this->s->result['typeName']]();
-					$this->s->pop();
-				},
-			]],
-			707 => ['name' => 'type meta', 'transitions' => [
-				'' => function(LT $token) {
-					$this->s->generated = $this->programBuilder->typeRegistry()['MetaType']($this->s->result['typeName']);
 					$this->s->pop();
 				},
 			]],
@@ -1723,6 +1726,21 @@ final readonly class ParserStateMachine {
 				},
 			]],
 			761 => ['name' => 'type type type', 'transitions' => [
+				T::type_keyword->name => function(LT $token) {
+					if (in_array($token->patternMatch->text, [
+						'Function', 'Tuple', 'Record', 'Union', 'Intersection', 'Atom', 'Enumeration',
+						'EnumerationSubset', 'IntegerSubset', 'RealSubset', 'StringSubset',
+						'State', 'Subtype', 'Alias', 'Named'
+					], true)) {
+						$this->s->result['type'] = $this->programBuilder->typeRegistry()['MetaType'](
+							$token->patternMatch->text
+						);
+						$this->s->move(763);
+						return;
+					}
+					$this->s->push(762);
+					$this->s->stay(701);
+				},
 				'' => function(LT $token) {
 					$this->s->push(762);
 					$this->s->stay(701);

@@ -6,6 +6,7 @@ use Walnut\Lang\Blueprint\Type\AliasType;
 use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\NothingType;
+use Walnut\Lang\Blueprint\Type\RecordType;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Implementation\Type\IntersectionType;
 use Walnut\Lang\Implementation\Type\ResultType;
@@ -21,7 +22,7 @@ final readonly class IntersectionTypeNormalizer {
         if (count($parsedTypes) === 1) {
             return $parsedTypes[0];
         }
-        return new IntersectionType(...$parsedTypes);
+        return new IntersectionType($this, ...$parsedTypes);
     }
 
     private function parseTypes(array $types): array {
@@ -43,6 +44,8 @@ final readonly class IntersectionTypeNormalizer {
                     $q = $queue[$ql];
                     if ($tx->isSubtypeOf($q)) {
                         array_splice($queue, $ql, 1);
+                    /*} else if ($q instanceof RecordType && $tx instanceof RecordType) {
+						echo 'URA';die;*/
                     } else if ($q instanceof ResultType || $tx instanceof ResultType) {
 	                    array_splice($queue, $ql, 1);
 

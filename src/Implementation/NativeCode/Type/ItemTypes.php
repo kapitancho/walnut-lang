@@ -35,6 +35,9 @@ final readonly class ItemTypes implements Method {
 	): TypeInterface {
 		if ($targetType instanceof TypeType) {
 			$refType = $this->toBaseType($targetType->refType());
+			if ($refType instanceof TupleType || $refType instanceof RecordType) {
+				return $this->context->typeRegistry->type($refType->restType());
+			}
 			if ($refType instanceof MetaType) {
 				if (in_array($refType->value(), [
 					MetaTypeValue::Tuple, MetaTypeValue::Union, MetaTypeValue::Intersection

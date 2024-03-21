@@ -17,6 +17,7 @@ use Walnut\Lang\Implementation\Registry\ExpressionRegistry;
 use Walnut\Lang\Implementation\Registry\ProgramBuilder;
 use Walnut\Lang\Implementation\Registry\ProgramBuilderFactory;
 use Walnut\Lang\Implementation\Registry\TypeRegistry;
+use Walnut\Lang\Implementation\Registry\UnionTypeNormalizer;
 use Walnut\Lang\Implementation\Registry\ValueRegistry;
 use Walnut\Lang\Implementation\Type\UnionType;
 
@@ -101,6 +102,7 @@ abstract class BaseProgramTestHelper extends TestCase {
 		$this->typeRegistry->addAlias(
 			new TypeNameIdentifier('JsonValue'),
 			new UnionType(
+				new UnionTypeNormalizer($this->typeRegistry),
 				$this->typeRegistry->null(),
 				$this->typeRegistry->boolean(),
 				$this->typeRegistry->integer(),
