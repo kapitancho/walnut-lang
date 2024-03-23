@@ -56,6 +56,7 @@ use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
 use Walnut\Lang\Blueprint\Type\NothingType;
 use Walnut\Lang\Blueprint\Type\NullType;
+use Walnut\Lang\Blueprint\Type\OptionalKeyType;
 use Walnut\Lang\Blueprint\Type\ProxyNamedType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
 use Walnut\Lang\Blueprint\Type\RealType;
@@ -256,6 +257,7 @@ final readonly class ProgramBuilder implements ProgramBuilderInterface, Program,
 				$this->typeRegistry->function($parameterType, $returnType),
 			'Union' => fn(array $types, bool $normalize = true): Type => $this->typeRegistry->union($types, $normalize),
 			'Intersection' => fn(array $types, bool $normalize = true): Type => $this->typeRegistry->intersection($types, $normalize),
+			'OptionalKey' => fn(Type $valueType): OptionalKeyType => $this->typeRegistry->optionalKey($valueType),
 			'Result' => fn(Type $okType, Type $errorType): Type => $this->typeRegistry->result($okType, $errorType),
 			'String' => fn(
 				int $minLength = 0,

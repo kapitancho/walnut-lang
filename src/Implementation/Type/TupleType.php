@@ -37,7 +37,7 @@ final readonly class TupleType implements TupleTypeInterface, JsonSerializable {
 		return $this->typeRegistry->array(
 			$this->typeRegistry->union([... $this->types(), $this->restType]),
 			$l,
-			$l,
+			$this->restType instanceof NothingType ? $l : PlusInfinity::value,
 		);
 	}
 

@@ -1855,6 +1855,10 @@ final readonly class ParserStateMachine {
 				}
 			]],
 			783 => ['name' => 'type result separator', 'transitions' => [
+				T::type_end->name => function(LT $token) {
+					$this->s->result['error_type'] = $this->programBuilder->typeRegistry()['Any']();
+					$this->s->stay(786);
+				},
 				T::value_separator->name => 784
 			]],
 			784 => ['name' => 'type result error type', 'transitions' => [
@@ -1957,12 +1961,49 @@ final readonly class ParserStateMachine {
 			]],
 			815 => ['name' => 'module level record value type', 'transitions' => [
 				'' => function(LT $token) {
+					if ($token->rule->tag === T::type_keyword->name && $token->patternMatch->text === 'OptionalKey') {
+						$this->s->move(835);
+						return;
+					}
 					$this->s->result['current_key'] ??=
                         $this->s->result['first_token']->patternMatch->text;
 					$this->s->push(816);
 					$this->s->stay(701);
 				},
 			]],
+			835 => ['name' => 'type optional key', 'transitions' => [
+				T::type_start->name => 836,
+				'' => function(LT $token) {
+					$this->s->result['compositeValues'][$this->s->result['current_key']] =
+						$this->programBuilder->typeRegistry()['OptionalKey'](
+							$this->programBuilder->typeRegistry()['Any']()
+						);
+					$this->s->stay(817);
+				},
+			]],
+			836 => ['name' => 'type optional type', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->push(837);
+					$this->s->stay(701);
+				},
+			]],
+			837 => ['name' => 'type optional return point', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->result['type'] = $this->s->generated;
+					$this->s->stay(838);
+				}
+			]],
+			838 => ['name' => 'type optional separator', 'transitions' => [
+				T::type_end->name => 839
+			]],
+			839 => ['name' => 'type optional return', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->result['compositeValues'][$this->s->result['current_key']] =
+						$this->programBuilder->typeRegistry()['OptionalKey']($this->s->generated);
+					$this->s->stay(817);
+				},
+			]],
+
 			816 => ['name' => 'module level record value return point', 'transitions' => [
 				'' => function(LT $token) {
 					$this->s->result['compositeValues'][$this->s->result['current_key']] = $this->s->generated;

@@ -22,6 +22,7 @@ use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NamedType;
 use Walnut\Lang\Blueprint\Type\NothingType;
 use Walnut\Lang\Blueprint\Type\NullType;
+use Walnut\Lang\Blueprint\Type\OptionalKeyType;
 use Walnut\Lang\Blueprint\Type\ProxyNamedType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
 use Walnut\Lang\Blueprint\Type\RealType;
@@ -91,6 +92,7 @@ interface TypeRegistry {
     public function function(Type $parameterType, Type $returnType): FunctionType;
 
     public function mutable(Type $valueType): MutableType;
+	public function optionalKey(Type $valueType): OptionalKeyType;
     public function result(Type $returnType, Type $errorType): ResultType;
     public function type(Type $refType): TypeType;
 

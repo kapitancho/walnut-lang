@@ -26,6 +26,7 @@ use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\MapType;
 use Walnut\Lang\Blueprint\Type\MutableType;
 use Walnut\Lang\Blueprint\Type\NullType;
+use Walnut\Lang\Blueprint\Type\OptionalKeyType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
 use Walnut\Lang\Blueprint\Type\RealType;
 use Walnut\Lang\Blueprint\Type\RecordType;
@@ -568,13 +569,21 @@ final readonly class Hydrator {
 	private function hydrateRecord(Value $value, RecordType $targetType, string $hydrationPath): DictValue {
 		if ($value instanceof DictValue) {
 			$l = count($value->values());
-			if (count($targetType->types()) <= $l) {
-				$result = [];
-				foreach($targetType->types() as $key => $refType) {
-					try {
-						$item = $value->valueOf(new PropertyNameIdentifier($key));
-						$result[$key] = $this->hydrate($item, $refType, "$hydrationPath.$key");
-					} catch (UnknownProperty) {
+
+			$usedKeys = [];
+			$result = [];
+			foreach($targetType->types() as $key => $refType) {
+				$isOptional = false;
+				if ($refType instanceof OptionalKeyType) {
+					$isOptional = true;
+					$refType = $refType->valueType();
+				}
+				try {
+					$item = $value->valueOf(new PropertyNameIdentifier($key));
+					$result[$key] = $this->hydrate($item, $refType, "$hydrationPath.$key");
+					$usedKeys[$key] = true;
+				} catch (UnknownProperty) {
+					if (!$isOptional) {
 						throw new HydrationException(
 							$value,
 							$hydrationPath,
@@ -582,15 +591,20 @@ final readonly class Hydrator {
 						);
 					}
 				}
-				return $this->context->valueRegistry->dict( $result);
 			}
-			throw new HydrationException(
+			foreach($value->values() as $key => $val) {
+				if (!($usedKeys[$key] ?? null)) {
+					$result[$key] = $this->hydrate($val, $targetType->restType(), "$hydrationPath.$key");
+				}
+			}
+			return $this->context->valueRegistry->dict( $result);
+			/*throw new HydrationException(
 				$value,
 				$hydrationPath,
 				sprintf("The record value should be with %s items",
 					count($targetType->types()),
 				)
-			);
+			);*/
 		}
 		throw new HydrationException(
 			$value,

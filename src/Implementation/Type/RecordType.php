@@ -10,6 +10,7 @@ use Walnut\Lang\Blueprint\Type\AnyType as AnyTypeInterface;
 use Walnut\Lang\Blueprint\Type\NothingType;
 use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Type\MapType;
+use Walnut\Lang\Blueprint\Type\OptionalKeyType;
 use Walnut\Lang\Blueprint\Type\RecordType as RecordTypeInterface;
 use Walnut\Lang\Blueprint\Type\UnknownProperty;
 
@@ -34,10 +35,15 @@ final readonly class RecordType implements RecordTypeInterface, JsonSerializable
 
 	public function asMapType(): MapType {
 		$l = count($this->types());
+		$min = count(array_filter($this->types(), fn($type) => !($type instanceof OptionalKeyType)));
+		$types = array_map(
+			fn(Type $type): Type => $type instanceof OptionalKeyType ? $type->valueType() : $type,
+			$this->types()
+		);
 		return $this->typeRegistry->map(
-			$this->typeRegistry->union(array_values([... $this->types(), $this->restType])),
-			$l,
-			$l,
+			$this->typeRegistry->union(array_values([... $types, $this->restType])),
+			$min,
+			$this->restType instanceof NothingType ? $l : PlusInfinity::value,
 		);
 	}
 
@@ -69,7 +75,8 @@ final readonly class RecordType implements RecordTypeInterface, JsonSerializable
 			$usedKeys[$key] = true;
 		}
 		foreach($ofTypes as $key => $type) {
-			if (!isset($usedKeys[$key]) && (!isset($this->types()[$key]) || $this->types()[$key]->isSubtypeOf($type))) {
+			if (!($type instanceof OptionalKeyType) && !isset($usedKeys[$key]) &&
+				(!isset($this->types()[$key]) || $this->types()[$key]->isSubtypeOf($type))) {
 				return false;
 			}
 		}
@@ -82,12 +89,14 @@ final readonly class RecordType implements RecordTypeInterface, JsonSerializable
 			return false;
 		}
 		foreach($this->types() as $type) {
-			if (!$type->isSubtypeOf($itemType)) {
+			$t = $type instanceof OptionalKeyType ? $type->valueType() : $type;
+			if (!$t->isSubtypeOf($itemType)) {
 				return false;
 			}
 		}
+		$min = count(array_filter($this->types(), fn($type) => !($type instanceof OptionalKeyType)));
 		$cnt = count($this->types());
-		if ($cnt < $ofType->range()->minLength()) {
+		if ($min < $ofType->range()->minLength()) {
 			return false;
 		}
 		$max = $ofType->range()->maxLength();

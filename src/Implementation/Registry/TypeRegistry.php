@@ -39,6 +39,7 @@ use Walnut\Lang\Implementation\Type\FunctionType;
 use Walnut\Lang\Implementation\Type\IntegerSubsetType;
 use Walnut\Lang\Implementation\Type\IntegerType;
 use Walnut\Lang\Implementation\Type\IntersectionType;
+use Walnut\Lang\Implementation\Type\OptionalKeyType;
 use Walnut\Lang\Implementation\Type\ProxyNamedType;
 use Walnut\Lang\Implementation\Type\MapType;
 use Walnut\Lang\Implementation\Type\MetaType;
@@ -183,6 +184,10 @@ final class TypeRegistry implements TypeRegistryInterface, TypeRegistryBuilder, 
 	/** @param list<StringValue> $values */
 	public function stringSubset(array $values): StringSubsetType {
 		return new StringSubsetType($values);
+	}
+
+    public function optionalKey(Type $valueType): OptionalKeyType {
+		return new OptionalKeyType($valueType);
 	}
 
     public function result(Type $returnType, Type $errorType): ResultType {
