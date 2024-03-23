@@ -25,6 +25,7 @@ use Walnut\Lang\Blueprint\Type\IntegerSubsetType;
 use Walnut\Lang\Blueprint\Type\IntegerType;
 use Walnut\Lang\Blueprint\Type\MapType;
 use Walnut\Lang\Blueprint\Type\MutableType;
+use Walnut\Lang\Blueprint\Type\NothingType;
 use Walnut\Lang\Blueprint\Type\NullType;
 use Walnut\Lang\Blueprint\Type\OptionalKeyType;
 use Walnut\Lang\Blueprint\Type\RealSubsetType;
@@ -507,22 +508,35 @@ final readonly class Hydrator {
 
 	private function hydrateTuple(Value $value, TupleType $targetType, string $hydrationPath): ListValue {
 		if ($value instanceof ListValue) {
-			$l = count($value->values());
-			if (count($targetType->types()) <= $l) {
-				$result = [];
-				foreach($targetType->types() as $seq => $refType) {
+			$l = count($targetType->types());
+			if ($targetType->restType() instanceof NothingType && count($value->values()) > $l) {
+				throw new HydrationException(
+					$value,
+					$hydrationPath,
+					sprintf("The tuple value should be with %d items",$l)
+				);
+			}
+			$result = [];
+			foreach($targetType->types() as $seq => $refType) {
+				try {
 					$item = $value->valueOf($seq);
 					$result[] = $this->hydrate($item, $refType, "{$hydrationPath}[$seq]");
+				} catch (UnknownProperty) {
+					throw new HydrationException(
+						$value,
+						$hydrationPath,
+						sprintf("The tuple value should contain the index %d", $seq)
+					);
 				}
-				return $this->context->valueRegistry->list($result);
 			}
-			throw new HydrationException(
-				$value,
-				$hydrationPath,
-				sprintf("The tuple value should be with %d items",
-					count($targetType->types()),
-				)
-			);
+			foreach($value->values() as $seq => $val) {
+				if (!isset($result[$seq])) {
+					$result[] = $this->hydrate($val,
+						$targetType->types()[$seq] ?? $targetType->restType(), "{$hydrationPath}[$seq]");
+				}
+			}
+			return $this->context->valueRegistry->list($result);
+
 		}
 		throw new HydrationException(
 			$value,
@@ -568,8 +582,6 @@ final readonly class Hydrator {
 
 	private function hydrateRecord(Value $value, RecordType $targetType, string $hydrationPath): DictValue {
 		if ($value instanceof DictValue) {
-			$l = count($value->values());
-
 			$usedKeys = [];
 			$result = [];
 			foreach($targetType->types() as $key => $refType) {
@@ -594,17 +606,17 @@ final readonly class Hydrator {
 			}
 			foreach($value->values() as $key => $val) {
 				if (!($usedKeys[$key] ?? null)) {
+					if ($targetType->restType() instanceof NothingType) {
+						throw new HydrationException(
+							$value,
+							$hydrationPath,
+							sprintf("The record value may not contain the key %s", $key)
+						);
+					}
 					$result[$key] = $this->hydrate($val, $targetType->restType(), "$hydrationPath.$key");
 				}
 			}
 			return $this->context->valueRegistry->dict( $result);
-			/*throw new HydrationException(
-				$value,
-				$hydrationPath,
-				sprintf("The record value should be with %s items",
-					count($targetType->types()),
-				)
-			);*/
 		}
 		throw new HydrationException(
 			$value,

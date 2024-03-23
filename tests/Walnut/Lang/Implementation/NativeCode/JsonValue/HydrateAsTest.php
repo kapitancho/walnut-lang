@@ -630,7 +630,7 @@ final class HydrateAsTest extends BaseProgramTestHelper {
 				'b' => $this->typeRegistry->string(),
 				'c' => $this->typeRegistry->boolean(),
 			]),
-			"@HydrationError[value: [a: 42, b: 'Hello'], hydrationPath: 'value', errorMessage: 'The record value should be with 3 items']"
+			"@HydrationError[value: [a: 42, b: 'Hello'], hydrationPath: 'value', errorMessage: 'The record value should contain the key c']"
 		);
 		$this->callHydrateAsError(
 			$this->valueRegistry->dict([
