@@ -40,7 +40,7 @@ final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodR
 		FunctionBody $functionBody,
 	): CustomMethodInterface {
 		$this->methods[$methodName->identifier] ??= [];
-		$this->methods[$methodName->identifier][] = $method = new CustomMethod(
+		$this->methods[$methodName->identifier][(string)$targetType] = $method = new CustomMethod(
 			$this->typeRegistry,
 			$this->valueRegistry,
 			$this->dependencyContainer,
