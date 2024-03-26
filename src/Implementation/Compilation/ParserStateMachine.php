@@ -11,6 +11,7 @@ use Walnut\Lang\Blueprint\Range\MinusInfinity;
 use Walnut\Lang\Blueprint\Range\PlusInfinity;
 use Walnut\Lang\Blueprint\Registry\ProgramBuilder;
 use Walnut\Lang\Implementation\Compilation\Token as T;
+use Walnut\Lib\Walex\PatternMatch;
 use Walnut\Lib\Walex\Token as LT;
 
 final readonly class ParserStateMachine {
@@ -538,6 +539,16 @@ final readonly class ParserStateMachine {
 			]],
 
 			280 => ['name' => 'list or dict expression', 'transitions' => [
+				T::string_value->name => function(LT $token) {
+					$this->s->result['first_token'] = new LT(
+						$token->rule,
+						new PatternMatch(
+							str_replace(['\`', '\n', '\\\\'], ["'", "\n", "\\"], substr($token->patternMatch->text, 1, -1))
+						),
+						$token->sourcePosition
+					);
+					$this->s->move(281);
+				},
 				T::word->name => $c = function(LT $token) {
 					$this->s->result['first_token'] = $token;
 					$this->s->move(281);
@@ -757,6 +768,13 @@ final readonly class ParserStateMachine {
 				},
 			]],
 			303 => ['name' => 'property name', 'transitions' => [
+				T::string_value->name => function(LT $token) {
+					$this->s->generated = $this->programBuilder->expressionRegistry()['property'](
+						$this->s->result['expression_left'],
+						str_replace(['\`', '\n', '\\\\'], ["'", "\n", "\\"], substr($token->patternMatch->text, 1, -1))
+					);
+					$this->s->move(304);
+				},
 				T::var_keyword->name => $c = function(LT $token) {
 					$this->s->generated = $this->programBuilder->expressionRegistry()['property'](
 						$this->s->result['expression_left'],
@@ -1111,6 +1129,16 @@ final readonly class ParserStateMachine {
 				},
 			]],
 			460 => ['name' => 'list or dict value', 'transitions' => [
+				T::string_value->name => function(LT $token) {
+					$this->s->result['first_token'] = new LT(
+						$token->rule,
+						new PatternMatch(
+							str_replace(['\`', '\n', '\\\\'], ["'", "\n", "\\"], substr($token->patternMatch->text, 1, -1))
+						),
+						$token->sourcePosition
+					);
+					$this->s->move(461);
+				},
 				T::word->name => $c = function(LT $token) {
 					$this->s->result['first_token'] = $token;
 					$this->s->move(461);
@@ -1935,6 +1963,16 @@ final readonly class ParserStateMachine {
 				}
 			]],
 			812 => ['name' => 'module level tuple or record', 'transitions' => [
+				T::string_value->name => function(LT $token) {
+					$this->s->result['first_token'] = new LT(
+						$token->rule,
+						new PatternMatch(
+							str_replace(['\`', '\n', '\\\\'], ["'", "\n", "\\"], substr($token->patternMatch->text, 1, -1))
+						),
+						$token->sourcePosition
+					);
+					$this->s->move(813);
+				},
 				'type_keyword' => function(LT $token) {
 					$this->s->result['first_token'] = $token;
 					$this->s->move(813);
@@ -1944,6 +1982,7 @@ final readonly class ParserStateMachine {
 					$this->s->move(814);
 				},
 				'var_keyword' => $c,
+				T::type->name => $c,
 				T::rest_type->name => 830,
 				T::default_match->name => 824,
 				T::colon->name => 834,
@@ -1960,16 +1999,29 @@ final readonly class ParserStateMachine {
 				T::colon->name => 815,
 			]],
 			815 => ['name' => 'module level record value type', 'transitions' => [
+				T::optional_key->name => function(LT $token) {
+					$this->s->result['current_key'] ??=
+                        $this->s->result['first_token']->patternMatch->text;
+					$this->s->push(840);
+					$this->s->move(701);
+				},
 				'' => function(LT $token) {
+					$this->s->result['current_key'] ??=
+                        $this->s->result['first_token']->patternMatch->text;
 					if ($token->rule->tag === T::type_keyword->name && $token->patternMatch->text === 'OptionalKey') {
 						$this->s->move(835);
 						return;
 					}
-					$this->s->result['current_key'] ??=
-                        $this->s->result['first_token']->patternMatch->text;
 					$this->s->push(816);
 					$this->s->stay(701);
 				},
+			]],
+			840 => ['name' => 'type optional ? return point', 'transitions' => [
+				'' => function(LT $token) {
+					$this->s->result['compositeValues'][$this->s->result['current_key']] =
+						$this->programBuilder->typeRegistry()['OptionalKey']($this->s->generated);
+					$this->s->stay(817);
+				}
 			]],
 			835 => ['name' => 'type optional key', 'transitions' => [
 				T::type_start->name => 836,

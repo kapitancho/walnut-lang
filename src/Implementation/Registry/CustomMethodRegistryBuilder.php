@@ -40,7 +40,7 @@ final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodR
 		FunctionBody $functionBody,
 	): CustomMethodInterface {
 		$this->methods[$methodName->identifier] ??= [];
-		$this->methods[$methodName->identifier][(string)$targetType] = $method = new CustomMethod(
+		$this->methods[$methodName->identifier][] = $method = new CustomMethod(
 			$this->typeRegistry,
 			$this->valueRegistry,
 			$this->dependencyContainer,
@@ -55,7 +55,7 @@ final class CustomMethodRegistryBuilder implements MethodRegistry, CustomMethodR
 	}
 
 	public function method(Type $targetType, MethodNameIdentifier $methodName): Method|UnknownMethod {
-		foreach($this->methods[$methodName->identifier] ?? [] as $method) {
+		foreach(array_reverse($this->methods[$methodName->identifier] ?? []) as $method) {
 			if ($targetType->isSubtypeOf($method->targetType())) {
 				return $method;
 			}

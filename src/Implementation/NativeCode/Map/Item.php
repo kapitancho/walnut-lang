@@ -17,6 +17,7 @@ use Walnut\Lang\Blueprint\Type\Type;
 use Walnut\Lang\Blueprint\Value\DictValue;
 use Walnut\Lang\Blueprint\Value\StringValue;
 use Walnut\Lang\Blueprint\Value\Value;
+use Walnut\Lang\Implementation\Type\OptionalKeyType;
 
 final readonly class Item implements Method {
 
@@ -36,16 +37,21 @@ final readonly class Item implements Method {
 				$this->context->typeRegistry->any()
 			);
 		}
+		$mapItemNotFound = $this->context->typeRegistry->state(new TypeNameIdentifier("MapItemNotFound"));
 		if ($type instanceof MapType) {
 			$parameterType = $this->context->toBaseType($parameterType);
 			if ($parameterType instanceof StringType || $parameterType instanceof StringSubsetType) {
 				$returnType = $type->itemType();
 				if ($targetType instanceof RecordType && $parameterType instanceof StringSubsetType) {
+					$tConv = fn(Type $type): Type => $type instanceof OptionalKeyType ?
+						$this->context->typeRegistry->result($type->valueType(), $mapItemNotFound) :
+						$type;
 					$returnType = $this->context->typeRegistry->union(
 						array_map(
-							fn(StringValue $value) =>
+							fn(StringValue $value) => $tConv(
 								$targetType->types()[$value->literalValue()] ??
-								$targetType->restType(),
+								$targetType->restType()
+							),
 							$parameterType->subsetValues()
 						)
 					);
@@ -56,12 +62,7 @@ final readonly class Item implements Method {
 						return $returnType;
 					}
 				}
-				return $this->context->typeRegistry->result(
-					$returnType,
-					$this->context->typeRegistry->state(
-						new TypeNameIdentifier("MapItemNotFound")
-					)
-				);
+				return $this->context->typeRegistry->result($returnType, $mapItemNotFound);
 			}
 			// @codeCoverageIgnoreStart
 			throw new AnalyserException(sprintf("[%s] Invalid parameter type: %s", __CLASS__, $parameterType    ));

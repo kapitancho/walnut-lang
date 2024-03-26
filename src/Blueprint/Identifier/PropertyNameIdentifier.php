@@ -8,8 +8,8 @@ final readonly class PropertyNameIdentifier implements JsonSerializable {
 	public function __construct(
 		public string $identifier
 	) {
-		preg_match('/^((\w+)|\d+)$/', $identifier) ||
-			IdentifierException::invalidPropertyNameIdentifier($identifier);
+		preg_match('/^((\w+)|\d+)$/', $identifier)/* ||
+			IdentifierException::invalidPropertyNameIdentifier($identifier)*/;
 	}
 
 	public function equals(PropertyNameIdentifier $identifier): bool {
