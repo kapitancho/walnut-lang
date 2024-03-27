@@ -31,9 +31,13 @@ final readonly class KeyExists implements Method {
 			$targetType = $targetType->asMapType();
 		}
 		if ($targetType instanceof MapType) {
+			$parameterType = $this->context->toBaseType($parameterType);
 			if ($parameterType instanceof StringType || $parameterType instanceof StringSubsetType) {
 				return $this->context->typeRegistry->boolean();
 			}
+			// @codeCoverageIgnoreStart
+			throw new AnalyserException(sprintf("[%s] Invalid parameter type: %s", __CLASS__, $parameterType));
+			// @codeCoverageIgnoreEnd
 		}
 		// @codeCoverageIgnoreStart
 		throw new AnalyserException(sprintf("[%s] Invalid target type: %s", __CLASS__, $targetType));

@@ -1580,7 +1580,11 @@ final readonly class ParserStateMachine {
 				T::range_dots->name => 733
 			]],
 			732 => ['name' => 'type string range dots', 'transitions' => [
-				T::range_dots->name => 733
+				T::range_dots->name => 733,
+				T::type_end->name => function(LT $token) {
+					$this->s->result['maxLength'] = $this->s->result['minLength'];
+					$this->s->move(735);
+				}
 			]],
 			733 => ['name' => 'type string range end', 'transitions' => [
 				T::positive_integer_number->name => function(LT $token) {

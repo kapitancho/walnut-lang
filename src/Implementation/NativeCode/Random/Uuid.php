@@ -25,7 +25,7 @@ final readonly class Uuid implements Method {
 	): Type {
 		$targetType = $this->context->toBaseType($targetType);
 		if ($targetType instanceof AtomType && $targetType->name()->equals(new TypeNameIdentifier('Random'))) {
-			return $this->context->typeRegistry->string(36);
+			return $this->context->typeRegistry->string(36, 36);
 		}
 		// @codeCoverageIgnoreStart
 		throw new AnalyserException(sprintf("[%s] Invalid target type: %s", __CLASS__, $targetType));
